@@ -29,15 +29,15 @@ class Score(dict):
     }
 
     MODE_COLORS = {
-        'single': discord.Color.red(),
-        'double': discord.Color.green(),
-        'co-op' : discord.Color.yellow()
+        'Single': discord.Color.red(),
+        'Double': discord.Color.green(),
+        'Co-op' : discord.Color.yellow()
     }
 
     MODE_ICON_URLS = {
-        'single': 'https://phoenix.piugame.com/l_img/stepball/full/s_bg.png',
-        'double': 'https://phoenix.piugame.com/l_img/stepball/full/d_bg.png',
-        'co-op' : 'https://phoenix.piugame.com/l_img/stepball/full/c_bg.png'
+        'Single': 'https://phoenix.piugame.com/l_img/stepball/full/s_bg.png',
+        'Double': 'https://phoenix.piugame.com/l_img/stepball/full/d_bg.png',
+        'Co-op' : 'https://phoenix.piugame.com/l_img/stepball/full/c_bg.png'
     }
 
     def __init__(self, chart, player, score, rank, date):
