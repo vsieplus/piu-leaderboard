@@ -49,7 +49,7 @@ class Score(dict):
         rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '#'
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         embed =  discord.Embed(
-            title=f'{self['player']}',
+            title=f'{self["player"]}',
             description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{self["score"]}',
             color=embed_color,
         )

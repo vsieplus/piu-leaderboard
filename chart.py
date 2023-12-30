@@ -21,4 +21,4 @@ class Chart(dict):
                       leaderboard_id=leaderboard_id, thumbnail_url=thumbnail_url)
 
     def get_leaderboard_url(self) -> str:
-        return f'{BASE_URL}?no={self['leaderboard_id']}'
+        return f'{BASE_URL}?no={self["leaderboard_id"]}'
