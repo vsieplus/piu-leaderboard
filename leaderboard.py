@@ -24,7 +24,7 @@ class Leaderboard:
                 reader = csv.DictReader(f)
                 for row in reader:
                     chart = Chart(row['title'], row['mode'], row['level'], row['id'], row['thumbnail'])
-                    self.charts[chart.chart_id] = chart
+                    self.charts[chart['chart_id']] = chart
 
         # scores is dict of { chart_id : dict of { player_id : Score } }
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):
@@ -35,17 +35,19 @@ class Leaderboard:
 
     def update(self):
         """Update the entire leaderboard from the website."""
+        urls = {}
         for chart in self.charts.values():
-            process = CrawlerProcess()
-            process.crawl(LeaderboardCrawler, leaderboard_url=chart.get_leaderboard_url(), scores=self.scores)
-            process.start()
+            urls[chart.get_leaderboard_url()] = chart
 
+        process = CrawlerProcess()
+        process.crawl(LeaderboardCrawler, leaderboard_urls=urls, scores=self.scores)
+        process.start()
         self.save()
 
     def query_score(self, player_id, level_id) -> Score:
         if level_id in self.scores:
             if player_id in self.scores[level_id]:
-                return self.scores[level_id][player_id].rank
+                return self.scores[level_id][player_id]
 
         return None
 
@@ -93,20 +95,33 @@ class GuildLeaderboard:
 class LeaderboardCrawler(scrapy.Spider):
     name = 'leaderboard_spider'
 
-    def __init__(self, leaderboard_url, scores):
-        self.start_urls = [leaderboard_url]
+    def __init__(self, leaderboard_urls, scores):
+        self.start_urls = leaderboard_urls.keys()
+        self.charts = leaderboard_urls
         self.scores = scores
 
     def parse(self, response):
+        chart = self.charts[response.request.meta['redirect_urls'][0]]
+        self.scores[chart['chart_id']] = dict()
+
         ranking_list = response.xpath('//div[@class="rangking_list_w"]//ul[@class="list"]/li')
         for ranking in ranking_list:
-            player_info = ranking.xpath('//div[@class="in flex vc wrap"]')
+            ranking_info = ranking.xpath('.//div[@class="in flex vc wrap"]')
 
-            player_num = player_info.xpath('//div[@class="num"]')
-            rank = player_num.xpath('//i[@class="tt"]/text()').get()
-            if rank is None:
-                rank_image_path = player_num.xpath('//div[@class="img_wrap"]//span[@class="medal_wrap"]//i[@class="img"]//img/@src]').get()
+            rank = self.parse_rank(ranking_info)
+            player_id = self.parse_player_id(ranking_info)
+            score = self.parse_score(ranking_info)
+            date = self.parse_date(ranking)
 
+            self.scores[chart['chart_id']][player_id] = Score(chart, player_id, score, rank, date)
+
+    def parse_rank(self, ranking_info) -> int:
+        player_num = ranking_info.xpath('.//div[@class="num"]')
+        rank = player_num.xpath('.//i[@class="tt"]/text()').get()
+        if rank is None:
+            rank_image_path = player_num.xpath('.//div[@class="img_wrap"]//span[@class="medal_wrap"]//i[@class="img"]//img/@src').get()
+
+            if rank_image_path is not None:
                 if 'goldmedal' in rank_image_path:
                     rank = 1
                 elif 'silvermedal' in rank_image_path:
@@ -116,17 +131,25 @@ class LeaderboardCrawler(scrapy.Spider):
                 else:
                     rank = 0
             else:
+                rank = 0
+        else:
+            try:
                 rank = int(rank)
+            except ValueError:
+                rank = 0
 
-            player_name = player_info.xpath('//div[@class="name flex vc wrap"]//div[@class="name_w"]')
-            name = player_name.xpath('//div[@class="profile_name en"]/text()')
-            tag = player_name.xpath('//div[@class="profile_name st1 en"]/text()')
-            player_id = f'{name}{tag}'
+        return rank
 
-            score = player_info.xpath('//div[@class="in_layOut flex vc wrap mgL"]//div[@class="score"]//i[@class="tt en"]/text()')
+    def parse_player_id(self, ranking_info) -> str:
+        player_name = ranking_info.xpath('.//div[@class="name flex vc wrap"]//div[@class="name_w"]')
+        name = player_name.xpath('.//div[@class="profile_name en"]/text()').get()
+        tag = player_name.xpath('.//div[@class="profile_name st1 en"]/text()').get()
+        player_id = f'{name}{tag}'
 
-            date = ranking.xpath('//div[@class="date"]//i[@class="tt"]/text()').get()
+        return player_id
 
-            breakpoint()
+    def parse_score(self, ranking_info) -> int:
+        return ranking_info.xpath('.//div[@class="in_layOut flex vc wrap mgL"]//div[@class="score"]//i[@class="tt en"]/text()').get()
 
-            self.scores[self.chart.chart_id][player_id] = Score(self.chart, player_id, score, rank, date)
+    def parse_date(self, ranking) -> str:
+        return ranking.xpath('.//div[@class="date"]//i[@class="tt"]/text()').get()
