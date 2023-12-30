@@ -1,11 +1,11 @@
 # chart.py
 
-BASE_URL = 'https://phoenix.piugame.com/leaderboard/over_ranking.php'
+BASE_URL = 'https://phoenix.piugame.com/leaderboard/over_ranking_view.php'
 
 MODE_ABBREV = {
-    'single': 'S',
-    'double': 'D',
-    'co-op' : 'Co-op'
+    'Single': 'S',
+    'Double': 'D',
+    'Co-op' : 'Co-op '
 }
 
 class Chart:
@@ -25,4 +25,4 @@ class Chart:
         if self.mode in MODE_ABBREV:
             mode_txt = MODE_ABBREV[self.mode]
 
-        return f'{self.chart.title} {mode_txt}{self.level}'
+        return f'{self.title} {mode_txt}{self.level}'
