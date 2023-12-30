@@ -56,7 +56,7 @@ async def untrack(ctx, player_id: str):
 
 @bot.command(name='query', help='Query a player\'s rank on a level')
 async def query(ctx, player_id: str, level_id: str):
-    score = leaderboards[ctx.guild.name].query_score(player_id, level_id)
+    score = leaderboard.query_score(player_id, level_id)
     if score is None:
         await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
     else:
