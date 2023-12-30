@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from leaderboard import Leaderboard
+from leaderboard import GuildLeaderboard, Leaderboard
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -19,11 +19,12 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 bot_channel_id = None
 
 leaderboards = dict()
+leaderboard = Leaderboard()
 
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
-        leaderboards[guild.name] = Leaderboard()
+        leaderboards[guild.name] = GuildLeaderboard(guild.name)
 
         print(
             f'{bot.user} is connected to the following guild:\n'
@@ -63,13 +64,12 @@ async def query(ctx, player_id: str, level_id: str):
 
 @tasks.loop(minutes=5)
 async def update_leaderboard():
-    Leaderboard.update()
+    leaderboard.update()
 
     for guild in bot.guilds:
         # only send updates in the 'piu-scores' channel
         for channel in guild.text_channels:
             if channel.name == 'piu-scores':
-                await leaderboards[guild.name].update_leaderboard(channel)
-
+                await leaderboards[guild.name].get_leaderboard_updates(channel)
 
 bot.run(TOKEN)
