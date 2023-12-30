@@ -2,7 +2,7 @@
 
 import discord
 
-class Score:
+class Score(dict):
     GRADE_EMOJIS = {
         'SSS+': '<:sss_p:1190380059832365210>',
         'SSS' : '<:sss:1190380075401629736>',
@@ -28,12 +28,6 @@ class Score:
         3 : '<:bronzemedal:1190380046846787666>'
     }
 
-    MODE_ABBREV = {
-        'single': 'S',
-        'double': 'D',
-        'co-op' : 'Co-op'
-    }
-
     MODE_COLORS = {
         'single': discord.Color.red(),
         'double': discord.Color.green(),
@@ -46,15 +40,8 @@ class Score:
         'co-op' : 'https://phoenix.piugame.com/l_img/stepball/full/c_bg.png'
     }
 
-    def __init__(self, song, mode, level, player, score, rank, date):
-        self.song = song
-        self.mode = mode
-        self.level = level
-        self.player = player
-        self.score = score
-        self.grade = score.calculate_grade(score)
-        self.rank = rank
-        self.date = date
+    def __init__(self, chart, player, score, rank, date):
+        dict.__init__(self, chart=chart, player=player, score=score, rank=rank, date=date)
 
     def embed(self) -> discord.Embed:
         embed_color = self.MODE_COLORS[self.mode] if self.mode in self.MODE_COLORS else discord.Color.black()
@@ -67,16 +54,9 @@ class Score:
         )
 
         icon_url = self.MODE_ICON_URLS[self.mode] if self.mode in self.MODE_ICON_URLS else None
-        embed.set_author(name=self.get_level_id(), url=self.song.get_leaderboard_url(), icon_url=icon_url)
-        embed.set_thumbnail(url=self.song.thumbnail_url)
+        embed.set_author(name=self.chart.level_id, url=self.chart.get_leaderboard_url(), icon_url=icon_url)
+        embed.set_thumbnail(url=self.chart.thumbnail_url)
         embed.set_footer(text=f'Date • {self.date}')
-
-    def get_level_id(self) -> str:
-        mode_txt = 'Unknown'
-        if self.mode in self.MODE_ABBREV:
-            mode_txt = self.MODE_ABBREV[self.mode]
-
-        return f'{self.song.title} {mode_txt}{self.level}'
 
     @classmethod
     def calculate_grade(score) -> str:
