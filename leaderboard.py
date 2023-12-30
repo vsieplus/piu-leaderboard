@@ -149,7 +149,14 @@ class LeaderboardCrawler(scrapy.Spider):
         return player_id
 
     def parse_score(self, ranking_info) -> int:
-        return ranking_info.xpath('.//div[@class="in_layOut flex vc wrap mgL"]//div[@class="score"]//i[@class="tt en"]/text()').get()
+        score = ranking_info.xpath('.//div[@class="in_layOut flex vc wrap mgL"]//div[@class="score"]//i[@class="tt en"]/text()').get()
+
+        if score is None:
+            return 0
+        else:
+            # remove commas from score
+            return int(score.replace(',', ''))
+
 
     def parse_date(self, ranking) -> str:
         return ranking.xpath('.//div[@class="date"]//i[@class="tt"]/text()').get()
