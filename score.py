@@ -41,27 +41,28 @@ MODE_ICON_URLS = {
 
 class Score(dict):
     def __init__(self, chart, player, score, rank, date):
-        dict.__init__(self, chart=chart, player=player, score=score, rank=rank, date=date)
+        dict.__init__(self, player=player, score=score, rank=rank, grade=Score.calculate_grade(score), date=date)
+        self.chart = chart
 
     def embed(self) -> discord.Embed:
-        embed_color = MODE_COLORS[self.mode] if self.mode in MODE_COLORS else discord.Color.black()
-        rank_emoji = f'{RANKING_EMOJIS[self.rank]} ' if self.rank in RANKING_EMOJIS else ''
-        grade_emoji = f'{GRADE_EMOJIS[self.grade]} ' if self.grade in GRADE_EMOJIS else ''
+        embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
+        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else ''
+        grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         embed =  discord.Embed(
-            title=f'{self.player}',
-            description=f'{rank_emoji}self.rank\n{grade_emoji}self.grade\n{self.score}',
+            title=f'{self['player']}',
+            description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{self["score"]}',
             color=embed_color,
         )
 
-        icon_url = MODE_ICON_URLS[self.mode] if self.mode in MODE_ICON_URLS else None
-        embed.set_author(name=self.chart.level_id, url=self.chart.get_leaderboard_url(), icon_url=icon_url)
-        embed.set_thumbnail(url=self.chart.thumbnail_url)
-        embed.set_footer(text=f'Date • {self.date}')
+        icon_url = MODE_ICON_URLS[self.chart['mode']] if self.chart['mode'] in MODE_ICON_URLS else None
+        embed.set_author(name=self.chart['chart_id'], url=self.chart.get_leaderboard_url(), icon_url=icon_url)
+        embed.set_thumbnail(url=self.chart['thumbnail_url'])
+        embed.set_footer(text=f'Date • {self["date"]}')
 
         return embed
 
     @classmethod
-    def calculate_grade(score) -> str:
+    def calculate_grade(cls, score) -> str:
         if score >= 995000:
             return 'SSS+'
         elif score >= 990000:
