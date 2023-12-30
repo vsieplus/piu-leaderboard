@@ -58,6 +58,8 @@ class Score(dict):
         embed.set_thumbnail(url=self.chart.thumbnail_url)
         embed.set_footer(text=f'Date • {self.date}')
 
+        return embed
+
     @classmethod
     def calculate_grade(score) -> str:
         if score >= 995000:
