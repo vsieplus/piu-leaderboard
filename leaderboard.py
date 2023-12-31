@@ -20,7 +20,7 @@ class Leaderboard:
         # chart is dict of song_id : Chart
         self.charts = dict()
         if os.path.isfile(self.SONGLIST_SAVE_FILE):
-            with open(self.SONGLIST_SAVE_FILE, 'r') as f:
+            with open(self.SONGLIST_SAVE_FILE, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     chart = Chart(row['title'], row['mode'], row['level'], row['id'], row['thumbnail'])
@@ -28,7 +28,7 @@ class Leaderboard:
 
         # scores is dict of { chart_id : dict of { player_id : Score } }
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):
-            with open(self.LEADERBOARD_SAVE_FILE, 'r') as f:
+            with open(self.LEADERBOARD_SAVE_FILE, 'r', encoding='utf-8') as f:
                 self.scores = json.loads(f.read())
         else :
             self.scores = dict()
@@ -52,8 +52,8 @@ class Leaderboard:
         return None
 
     def save(self):
-        with open(self.LEADERBOARD_SAVE_FILE, 'w') as f:
-            f.write(json.dumps(self.scores))
+        with open(self.LEADERBOARD_SAVE_FILE, 'w', encoding='utf-8') as f:
+            f.write(json.dumps(self.scores, indent=2))
 
 class GuildLeaderboard:
     PLAYERS_SAVE_FILE = 'players.txt'
@@ -101,7 +101,7 @@ class LeaderboardCrawler(scrapy.Spider):
         self.scores = scores
 
     def parse(self, response):
-        chart = self.charts[response.request.meta['redirect_urls'][0]]
+        chart = self.charts[response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.request.url]
         self.scores[chart['chart_id']] = dict()
 
         ranking_list = response.xpath('//div[@class="rangking_list_w"]//ul[@class="list"]/li')
@@ -156,7 +156,6 @@ class LeaderboardCrawler(scrapy.Spider):
         else:
             # remove commas from score
             return int(score.replace(',', ''))
-
 
     def parse_date(self, ranking) -> str:
         return ranking.xpath('.//div[@class="date"]//i[@class="tt"]/text()').get()
