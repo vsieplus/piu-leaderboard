@@ -2,12 +2,11 @@
    - non case-sensitive
    - don't require tag #XXXX
    - update scores for specified song before querying
-- complete songlist
-- decorate logo
-- player profile icon?
 - fix score formatting
 - automatic updates
   - track placement/score changes
+- decorate logo
+- player profile icon?
 
 bugs
 - leaderboard update sometimes doesn't get scores for all songs
