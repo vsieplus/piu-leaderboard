@@ -31,7 +31,7 @@ async def on_ready():
             f'{guild.name}(id: {guild.id})'
         )
 
-    update_leaderboard.start()
+    #update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -56,11 +56,12 @@ async def untrack(ctx, player_id: str):
 
 @bot.command(name='query', help='Query a player\'s rank on a level')
 async def query(ctx, player_id: str, level_id: str):
-    score = await leaderboard.query_score(player_id, level_id)
-    if score is None:
+    scores = await leaderboard.query_score(player_id, level_id)
+    if scores is None or len(scores) == 0:
         await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
     else:
-        await ctx.send(embed=score.embed())
+        for score in scores:
+            await ctx.send(embed=score.embed())
 
 @tasks.loop(minutes=60)
 async def update_leaderboard():

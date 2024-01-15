@@ -4,6 +4,8 @@ import csv
 import json
 import os
 
+from typing import List
+
 import scrapy
 from scrapy.crawler import CrawlerProcess
 
@@ -17,6 +19,7 @@ class Leaderboard:
     SONGLIST_SAVE_FILE = os.path.join(SAVE_DIR, 'songlist.csv')
 
     def __init__(self):
+        """Initialize the master leaderboard."""
         # chart is dict of song_id : Chart
         self.charts = dict()
         if os.path.isfile(self.SONGLIST_SAVE_FILE):
@@ -33,25 +36,49 @@ class Leaderboard:
         else :
             self.scores = dict()
 
-    async def update(self):
-        """Update the entire leaderboard from the website."""
+    async def update(self, chart_id=None):
+        """ Update the leaderboard(s)
+        @param chart_id: the level's ID; if None, update all levels
+        @return: None
+        """
         urls = {}
-        for chart in self.charts.values():
-            urls[chart.get_leaderboard_url()] = chart\
+        if chart_id is not None:
+            if chart_id in self.charts:
+                chart = self.charts[chart_id]
+                urls[chart.get_leaderboard_url()] = chart
+            else:
+                return
+        else:
+            for chart in self.charts.values():
+                urls[chart.get_leaderboard_url()] = chart
 
         process = CrawlerProcess()
         process.crawl(LeaderboardCrawler, leaderboard_urls=urls, scores=self.scores)
         process.start()
         await self.save()
 
-    async def query_score(self, player_id, level_id) -> Score:
-        if level_id in self.scores:
-            if player_id in self.scores[level_id]:
-                return self.scores[level_id][player_id]
+    async def query_score(self, player_id, chart_id) -> List[Score]:
+        """ Query a player's score on a level.
+        @param player_id: the player's ID, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
+        @param chart_id: the level's ID
+        @return: list(Score) of all matching players' scores on the given level
+        """
+        # rescrape the scores for the given level
+        if chart_id in self.charts:
+            await self.update(chart_id)
+
+        if chart_id in self.scores:
+            if '#' in player_id:
+                return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
+            else:
+                return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]]
 
         return None
 
     async def save(self):
+        """Save the leaderboard to a file in JSON format.
+        @return: None
+        """
         with open(self.LEADERBOARD_SAVE_FILE, 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.scores, indent=2))
 
@@ -59,6 +86,9 @@ class GuildLeaderboard:
     PLAYERS_SAVE_FILE = 'players.txt'
 
     def __init__(self, guild_name):
+        """ Initialize the guild's leaderboard.
+        @param guild_name: the guild's name
+        """
         self.players = set()
         self.players_file = os.path.join(SAVE_DIR, f'{guild_name}_{self.PLAYERS_SAVE_FILE}')
         if os.path.isfile(self.players_file):
@@ -67,28 +97,39 @@ class GuildLeaderboard:
                     self.players.add(line.strip())
 
     async def add_player(self, player_id) -> bool:
-        if player_id not in self.players:
+        """ Add a player to the guild's leaderboard. If the player is already being tracked, do nothing.
+        Players that are being tracked will have their leaderboard updates automatically sent to the guild's 'piu-scores' channel.
+        @param player_id: the player's ID, in the format of name#tag
+        @return: True if the player was added, False otherwise
+        """
+        added = player_id not in self.players
+        if added:
             self.players.add(player_id)
-            return True
-        else:
-            return False
 
-        self.save()
+        await self.save()
+        return added
 
     async def remove_player(self, player_id) -> bool:
-        if player_id in self.players:
+        """ Remove a player from the guild's leaderboard. If the player is not being tracked, do nothing.
+        @param player_id: the player's ID, in the format of name#tag
+        @return: True if the player was removed, False otherwise
+        """
+        removed = player_id in self.players
+        if removed:
             self.players.remove(player_id)
-            return True
-        else:
-            return False
 
-        self.save()
+        await self.save()
+        return removed
 
     async def get_leaderboard_updates(self, channel):
+        """ Get the leaderboard updates for all the players being tracked in the guild.
+        @param channel: the channel to send the updates to
+        @return: None
+        """
         await channel.send('Updating leaderboard...')
 
     async def save(self):
-        with open(self.players_file, 'w') as f:
+        with open(self.players_file, 'w', encoding='utf-8') as f:
             for player in self.players:
                 f.write(f'{player}\n')
 
@@ -96,11 +137,20 @@ class LeaderboardCrawler(scrapy.Spider):
     name = 'leaderboard_spider'
 
     def __init__(self, leaderboard_urls, scores):
+        """Initialize the leaderboard crawler.
+        @param leaderboard_urls: dict of { url : Chart }
+        @param scores: dict of { chart_id : dict of { player_id : Score } }
+        @return: None
+        """
         self.start_urls = leaderboard_urls.keys()
         self.charts = leaderboard_urls
         self.scores = scores
 
     def parse(self, response):
+        """Parse the leaderboard page.
+        @param response: the response from the leaderboard page
+        @return: None
+        """
         chart = self.charts[response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.request.url]
         self.scores[chart['chart_id']] = dict()
 
@@ -116,6 +166,10 @@ class LeaderboardCrawler(scrapy.Spider):
             self.scores[chart['chart_id']][player_id] = Score(chart, player_id, score, rank, date)
 
     def parse_rank(self, ranking_info) -> int:
+        """Parse the player's rank.
+        @param ranking_info: the ranking info div
+        @return: the player's rank
+        """
         player_num = ranking_info.xpath('.//div[@class="num"]')
         rank = player_num.xpath('.//i[@class="tt"]/text()').get()
         if rank is None:
@@ -141,6 +195,10 @@ class LeaderboardCrawler(scrapy.Spider):
         return rank
 
     def parse_player_id(self, ranking_info) -> str:
+        """Parse the player's ID.
+        @param ranking_info: the ranking info div
+        @return: the player's ID
+        """
         player_name = ranking_info.xpath('.//div[@class="name flex vc wrap"]//div[@class="name_w"]')
         name = player_name.xpath('.//div[@class="profile_name en"]/text()').get()
         tag = player_name.xpath('.//div[@class="profile_name st1 en"]/text()').get()
@@ -149,6 +207,10 @@ class LeaderboardCrawler(scrapy.Spider):
         return player_id
 
     def parse_score(self, ranking_info) -> int:
+        """Parse the player's score.
+        @param ranking_info: the ranking info div
+        @return: the player's score, or 0 if the player has no score
+        """
         score = ranking_info.xpath('.//div[@class="in_layOut flex vc wrap mgL"]//div[@class="score"]//i[@class="tt en"]/text()').get()
 
         if score is None:
@@ -158,4 +220,8 @@ class LeaderboardCrawler(scrapy.Spider):
             return int(score.replace(',', ''))
 
     def parse_date(self, ranking) -> str:
+        """Parse the date the score was set.
+        @param ranking: the ranking div
+        @return: the date the score was set
+        """
         return ranking.xpath('.//div[@class="date"]//i[@class="tt"]/text()').get()
