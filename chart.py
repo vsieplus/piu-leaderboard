@@ -5,7 +5,7 @@ BASE_URL = 'https://phoenix.piugame.com/leaderboard/over_ranking_view.php'
 MODE_ABBREV = {
     'Single': 'S',
     'Double': 'D',
-    'Co-op' : 'Co-op '
+    'Co-op' : 'Co-op'
 }
 
 def get_chart_id(title, mode, level) -> str:
