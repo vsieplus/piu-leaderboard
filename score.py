@@ -46,7 +46,7 @@ class Score(dict):
 
     def embed(self) -> discord.Embed:
         embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
-        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '#'
+        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} #' if self['rank'] in RANKING_EMOJIS else '#'
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         embed =  discord.Embed(
             title=f'{self["player"]}',
