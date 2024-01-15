@@ -98,7 +98,7 @@ class GuildLeaderboard:
 
     async def add_player(self, player_id) -> bool:
         """ Add a player to the guild's leaderboard. If the player is already being tracked, do nothing.
-        Players that are being tracked will have their leaderboard updates automatically sent to the guild's 'piu-scores' channel.
+        Players that are being tracked will have their leaderboard updates automatically sent to the guild's 'piu-leaderboard' channel.
         @param player_id: the player's ID, in the format of name#tag
         @return: True if the player was added, False otherwise
         """

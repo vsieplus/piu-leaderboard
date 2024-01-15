@@ -21,6 +21,8 @@ bot_channel_id = None
 leaderboards = dict()
 leaderboard = Leaderboard()
 
+CHANNEL_NAME = 'piu-leaderboard'
+
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
@@ -70,9 +72,9 @@ async def update_leaderboard():
     await leaderboard.update()
 
     for guild in bot.guilds:
-        # only send updates in the 'piu-scores' channel
+        # only send updates in the 'piu-leaderboard' channel
         for channel in guild.text_channels:
-            if channel.name == 'piu-scores':
+            if channel.name == CHANNEL_NAME:
                 await leaderboards[guild.name].get_leaderboard_updates(channel)
 
 bot.run(TOKEN)
