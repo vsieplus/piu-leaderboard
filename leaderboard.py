@@ -27,7 +27,7 @@ class Leaderboard:
                 reader = csv.DictReader(f)
                 for row in reader:
                     chart = Chart(row['title'], row['mode'], row['level'], row['id'], row['thumbnail'])
-                    self.charts[chart['chart_id']] = chart
+                    self.charts[chart['chart_id'].lower()] = chart
 
         # scores is dict of { chart_id : dict of { player_id : Score } }
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):
@@ -38,7 +38,7 @@ class Leaderboard:
 
     async def update(self, chart_id=None):
         """ Update the leaderboard(s)
-        @param chart_id: the level's ID; if None, update all levels
+        @param chart_id: the chart's ID, lowercase; if None, update all chart leaderboards
         @return: None
         """
         urls = {}
@@ -64,6 +64,7 @@ class Leaderboard:
         @return: list(Score) of all matching players' scores on the given level
         """
         # rescrape the scores for the given level
+        chart_id = chart_id.lower()
         if chart_id in self.charts:
             await self.update(chart_id)
 
@@ -152,7 +153,7 @@ class LeaderboardCrawler(scrapy.Spider):
         @return: None
         """
         chart = self.charts[response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.request.url]
-        self.scores[chart['chart_id']] = dict()
+        self.scores[chart['chart_id'].lower()] = dict()
 
         ranking_list = response.xpath('//div[@class="rangking_list_w"]//ul[@class="list"]/li')
         for ranking in ranking_list:
@@ -163,7 +164,7 @@ class LeaderboardCrawler(scrapy.Spider):
             score = self.parse_score(ranking_info)
             date = self.parse_date(ranking)
 
-            self.scores[chart['chart_id']][player_id] = Score(chart, player_id, score, rank, date)
+            self.scores[chart['chart_id'].lower()][player_id] = Score(chart, player_id, score, rank, date)
 
     def parse_rank(self, ranking_info) -> int:
         """Parse the player's rank.
