@@ -2,6 +2,8 @@
 
 import discord
 
+from chart import Chart
+
 GRADE_EMOJIS = {
     'SSS+': '<:sss_p:1190380059832365210>',
     'SSS' : '<:sss:1190380075401629736>',
@@ -27,6 +29,10 @@ RANKING_EMOJIS = {
     3 : '<:bronzemedal:1190380046846787666>'
 }
 
+AVATAR_EMOJIS = {
+    '4f617606e7751b2dc2559d80f09c40bf' : '<:avatar_1:1196561981499523234>'
+}
+
 MODE_COLORS = {
     'Single': discord.Color.red(),
     'Double': discord.Color.green(),
@@ -40,16 +46,17 @@ MODE_ICON_URLS = {
 }
 
 class Score(dict):
-    def __init__(self, chart, player, score, rank, date):
-        dict.__init__(self, player=player, score=score, rank=rank, grade=Score.calculate_grade(score), date=date)
+    def __init__(self, chart: Chart, player: str, score: int, rank: int, avatar_id: str, date: str):
+        dict.__init__(self, player=player, score=score, rank=rank, grade=Score.calculate_grade(score), avatar_id=avatar_id, date=date)
         self.chart = chart
 
     def embed(self) -> discord.Embed:
         embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
         rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} #' if self['rank'] in RANKING_EMOJIS else '#'
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
+        avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
         embed =  discord.Embed(
-            title=f'{self["player"]}',
+            title=f'{avatar_emoji}{self["player"]}',
             description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{format(self["score"], ',')}',
             color=embed_color,
         )
@@ -62,7 +69,7 @@ class Score(dict):
         return embed
 
     @classmethod
-    def calculate_grade(cls, score) -> str:
+    def calculate_grade(cls, score: int) -> str:
         if score >= 995000:
             return 'SSS+'
         elif score >= 990000:

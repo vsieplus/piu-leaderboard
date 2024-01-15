@@ -3,6 +3,7 @@
 import csv
 import json
 import os
+import re
 
 from typing import List
 
@@ -74,6 +75,7 @@ class Leaderboard:
             if '#' in player_id:
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
             else:
+                breakpoint()
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]]
 
         return None
@@ -192,9 +194,10 @@ class LeaderboardCrawler(scrapy.Spider):
             rank = self.parse_rank(ranking_info)
             player_id = self.parse_player_id(ranking_info)
             score = self.parse_score(ranking_info)
+            avatar_id = self.parse_avatar_id(ranking_info)
             date = self.parse_date(ranking)
 
-            self.scores[chart['chart_id'].lower()][player_id] = Score(chart, player_id, score, rank, date)
+            self.scores[chart['chart_id'].lower()][player_id] = Score(chart, player_id, score, rank, avatar_id, date)
 
     def parse_rank(self, ranking_info) -> int:
         """Parse the player's rank.
@@ -249,6 +252,16 @@ class LeaderboardCrawler(scrapy.Spider):
         else:
             # remove commas from score
             return int(score.replace(',', ''))
+
+    def parse_avatar_id(self, ranking) -> str:
+        """ Parse the player's avatar ID.
+        @param ranking: the ranking div
+        @return: the player's avatar ID
+        """
+        profile_img = ranking.xpath('.//div[@class="profile_img"]//div[@class="resize"]//div[@class="re bgfix"]/@style').get()
+        avatar_id =  re.search(r'(?<=background-image:url\(\'https://phoenix.piugame.com/data/avatar_img/)[0-9a-z]+(?=.png)', profile_img).group()
+
+        return avatar_id
 
     def parse_date(self, ranking) -> str:
         """Parse the date the score was set.
