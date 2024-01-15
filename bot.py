@@ -56,12 +56,14 @@ async def untrack(ctx, player_id: str):
 
 @bot.command(name='query', help='Query a player\'s rank on a level')
 async def query(ctx, player_id: str, level_id: str):
-    scores = await leaderboard.query_score(player_id, level_id)
-    if scores is None or len(scores) == 0:
-        await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
-    else:
-        for score in scores:
-            await ctx.send(embed=score.embed())
+    async with ctx.typing():
+        scores = await leaderboard.query_score(player_id, level_id)
+
+        if scores is None or len(scores) == 0:
+            await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
+        else:
+            for score in scores:
+                await ctx.send(embed=score.embed())
 
 @tasks.loop(minutes=60)
 async def update_leaderboard():
