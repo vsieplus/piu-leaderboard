@@ -67,12 +67,42 @@ class Leaderboard:
         chart_id = chart_id.lower()
         if chart_id in self.charts:
             await self.update(chart_id)
+        else:
+            return None
 
         if chart_id in self.scores:
             if '#' in player_id:
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
             else:
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]]
+
+        return None
+
+    async def query_rank(self, rank, chart_id) -> List[Score]:
+        """ Query all scores with a given rank on a level.
+        @param rank: the rank to query
+        @param chart_id: the level's ID
+        @return: list(Score) of all matching scores on the given level
+        """
+        # rescrape the scores for the given level
+        chart_id = chart_id.lower()
+        if chart_id in self.charts:
+            await self.update(chart_id)
+        else:
+            return None
+
+        if chart_id in self.scores:
+            scores = []
+            found = False
+            for key, value in self.scores[chart_id].items():
+                if rank == value['rank']:
+                    scores.append(value)
+                    found = True
+                elif found:
+                    # since the scores are sorted by rank, we can break once we've found all the scores with the given rank
+                    break
+
+            return scores
 
         return None
 

@@ -90,13 +90,28 @@ async def untrack(ctx, player_id: str):
     else:
         await ctx.send(f'Player {player_id} is not being tracked.')
 
-@bot.command(name='query', help='Query a player\'s rank on a level')
-async def query(ctx, player_id: str, level_id: str):
+@bot.command(name='queryp', help='Query a player\'s rank on a level')
+async def queryp(ctx, player_id: str, level_id: str):
     async with ctx.typing():
         scores = await leaderboard.query_score(player_id, level_id)
 
-        if scores is None or len(scores) == 0:
+        if scores is None:
+            await ctx.send(f'`"{level_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+        elif len(scores) == 0:
             await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
+        else:
+            for score in scores:
+                await ctx.send(embed=score.embed())
+
+@bot.command(name='queryr', help='Query a specific rank on a level')
+async def queryr(ctx, rank: int, level_id: str):
+    async with ctx.typing():
+        scores = await leaderboard.query_rank(rank, level_id)
+
+        if scores is None:
+            await ctx.send(f'`"{level_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+        elif len(scores) == 0:
+            await ctx.send(f'No scores with rank {rank} on {level_id}.')
         else:
             for score in scores:
                 await ctx.send(embed=score.embed())
