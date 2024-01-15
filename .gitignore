@@ -1,2 +1,5 @@
 .env
 __pycache__/
+
+data/*_players.txt
+data/leaderboard.json
