@@ -50,7 +50,7 @@ class Score(dict):
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         embed =  discord.Embed(
             title=f'{self["player"]}',
-            description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{self["score"]}',
+            description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{format(self["score"], ',')}',
             color=embed_color,
         )
 
@@ -83,15 +83,15 @@ class Score(dict):
             return 'AA+'
         elif score >= 900000:
             return 'AA'
-        elif score >= 800000:
+        elif score >= 825000:
             return 'A+'
-        elif score >= 700000:
+        elif score >= 750000:
             return 'A'
-        elif score >= 600000:
+        elif score >= 700000:
             return 'B'
-        elif score >= 500000:
+        elif score >= 600000:
             return 'C'
-        elif score >= 400000:
+        elif score >= 450000:
             return 'D'
         else:
             return 'F'
