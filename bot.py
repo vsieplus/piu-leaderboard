@@ -42,29 +42,29 @@ async def on_command_error(ctx, error):
 
 @bot.command(name='track', help='Begin tracking a player\'s scores')
 async def track(ctx, player_id: str):
-    if leaderboards[ctx.guild.name].add_player(player_id):
+    if await leaderboards[ctx.guild.name].add_player(player_id):
         await ctx.send(f'Now tracking player {player_id}.')
     else:
         await ctx.send(f'Player {player_id} is already being tracked.')
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
 async def untrack(ctx, player_id: str):
-    if leaderboards[ctx.guild.name].remove_player(player_id):
+    if await leaderboards[ctx.guild.name].remove_player(player_id):
         await ctx.send(f'No longer tracking player {player_id}.')
     else:
         await ctx.send(f'Player {player_id} is not being tracked.')
 
 @bot.command(name='query', help='Query a player\'s rank on a level')
 async def query(ctx, player_id: str, level_id: str):
-    score = leaderboard.query_score(player_id, level_id)
+    score = await leaderboard.query_score(player_id, level_id)
     if score is None:
         await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
     else:
         await ctx.send(embed=score.embed())
 
-@tasks.loop(minutes=5)
+@tasks.loop(minutes=60)
 async def update_leaderboard():
-    leaderboard.update()
+    await leaderboard.update()
 
     for guild in bot.guilds:
         # only send updates in the 'piu-scores' channel

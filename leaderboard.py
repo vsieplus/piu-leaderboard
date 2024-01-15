@@ -33,25 +33,25 @@ class Leaderboard:
         else :
             self.scores = dict()
 
-    def update(self):
+    async def update(self):
         """Update the entire leaderboard from the website."""
         urls = {}
         for chart in self.charts.values():
-            urls[chart.get_leaderboard_url()] = chart
+            urls[chart.get_leaderboard_url()] = chart\
 
         process = CrawlerProcess()
         process.crawl(LeaderboardCrawler, leaderboard_urls=urls, scores=self.scores)
         process.start()
-        self.save()
+        await self.save()
 
-    def query_score(self, player_id, level_id) -> Score:
+    async def query_score(self, player_id, level_id) -> Score:
         if level_id in self.scores:
             if player_id in self.scores[level_id]:
                 return self.scores[level_id][player_id]
 
         return None
 
-    def save(self):
+    async def save(self):
         with open(self.LEADERBOARD_SAVE_FILE, 'w', encoding='utf-8') as f:
             f.write(json.dumps(self.scores, indent=2))
 
@@ -66,7 +66,7 @@ class GuildLeaderboard:
                 for line in f:
                     self.players.add(line.strip())
 
-    def add_player(self, player_id) -> bool:
+    async def add_player(self, player_id) -> bool:
         if player_id not in self.players:
             self.players.add(player_id)
             return True
@@ -75,7 +75,7 @@ class GuildLeaderboard:
 
         self.save()
 
-    def remove_player(self, player_id) -> bool:
+    async def remove_player(self, player_id) -> bool:
         if player_id in self.players:
             self.players.remove(player_id)
             return True
@@ -87,7 +87,7 @@ class GuildLeaderboard:
     async def get_leaderboard_updates(self, channel):
         await channel.send('Updating leaderboard...')
 
-    def save(self):
+    async def save(self):
         with open(self.players_file, 'w') as f:
             for player in self.players:
                 f.write(f'{player}\n')
