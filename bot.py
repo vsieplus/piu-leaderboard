@@ -77,14 +77,14 @@ async def on_command_error(ctx, error):
 
 
 @bot.command(name='track', help='Begin tracking a player\'s scores')
-async def track(self, ctx, player_id: str):
+async def track(ctx, player_id: str):
     if await leaderboards[ctx.guild.name].add_player(player_id):
         await ctx.send(f'Now tracking player {player_id}.')
     else:
         await ctx.send(f'Player {player_id} is already being tracked.')
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
-async def untrack(self, ctx, player_id: str):
+async def untrack(ctx, player_id: str):
     if await leaderboards[ctx.guild.name].remove_player(player_id):
         await ctx.send(f'No longer tracking player {player_id}.')
     else:
