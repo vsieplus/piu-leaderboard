@@ -1,9 +1,6 @@
-- fix scrapy issues:
-  - restart reactor to allow multiple crawls
 - automatic updates
   - track placement/score changes
   - async updating?
 - decorate logo
-- add behavior to avoid rescraping if already scraped in the last x mins?
 - handle rank queries properly when ties exist
   - e.g. query rank 2 when there's a 3 way-tie for 1st should ?
