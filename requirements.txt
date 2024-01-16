@@ -1,6 +1,5 @@
+crochet==2.1.1
 discord.py==2.3.2
 python-dotenv==1.0.0
 Scrapy==2.5.1
-Twisted==22.10.0
-pyopenssl==22.0.0
-cryptography==38.0.4
+Twisted==20.3.0

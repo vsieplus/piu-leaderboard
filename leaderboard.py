@@ -8,10 +8,15 @@ import re
 from typing import List
 
 import scrapy
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerRunner
+from scrapy.utils.project import get_project_settings
+from twisted.internet import reactor
+from crochet import setup, wait_for
 
 from score import Score
 from chart import Chart
+
+setup()
 
 SAVE_DIR = 'data'
 
@@ -53,10 +58,17 @@ class Leaderboard:
             for chart in self.charts.values():
                 urls[chart.get_leaderboard_url()] = chart
 
-        process = CrawlerProcess()
-        process.crawl(LeaderboardCrawler, leaderboard_urls=urls, scores=self.scores)
-        process.start()
+        self.run_crawl(urls)
+
         await self.save()
+
+    @wait_for(timeout=60.0)  # Adjust timeout as needed
+    def run_crawl(self, urls):
+        runner = CrawlerRunner(get_project_settings())
+        for url, chart in urls.items():
+            runner.crawl(LeaderboardCrawler, leaderboard_urls={ url : chart }, scores=self.scores)
+        d = runner.join()  # This returns a Deferred that fires when all crawling jobs have finished.
+        return d
 
     async def query_score(self, player_id, chart_id) -> List[Score]:
         """ Query a player's score on a level.
