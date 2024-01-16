@@ -6,6 +6,7 @@ import os
 import re
 
 from typing import List
+import discord
 
 import scrapy
 from scrapy.crawler import CrawlerRunner
@@ -70,19 +71,24 @@ class Leaderboard:
         d = runner.join()  # This returns a Deferred that fires when all crawling jobs have finished.
         return d
 
-    async def query_score(self, player_id, chart_id) -> List[Score]:
+    async def rescrape(self, chart_id: str) -> bool:
+        """ Rescrape the leaderboard for a given chart.
+        @param chart_id: the chart's ID
+        @return: True if the chart was rescraped, False otherwise
+        """
+        chart_id = chart_id.lower()
+        if chart_id in self.charts:
+            await self.update(chart_id)
+            return True
+
+        return False
+
+    async def query_score(self, player_id: str, chart_id: str) -> List[Score]:
         """ Query a player's score on a level.
         @param player_id: the player's ID, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
         @param chart_id: the level's ID
         @return: list(Score) of all matching players' scores on the given level
         """
-        # rescrape the scores for the given level
-        chart_id = chart_id.lower()
-        if chart_id in self.charts:
-            await self.update(chart_id)
-        else:
-            return None
-
         if chart_id in self.scores:
             if '#' in player_id:
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
@@ -91,29 +97,27 @@ class Leaderboard:
 
         return None
 
-    async def query_rank(self, rank, chart_id) -> List[Score]:
+    async def query_rank(self, rank: int, chart_id: str) -> List[Score]:
         """ Query all scores with a given rank on a level.
         @param rank: the rank to query
         @param chart_id: the level's ID
-        @return: list(Score) of all matching scores on the given level
+        @return: list(Score) of all matching rank scores on the given level
         """
-        # rescrape the scores for the given level
-        chart_id = chart_id.lower()
-        if chart_id in self.charts:
-            await self.update(chart_id)
-        else:
+        # verify rank is between 1 and 100
+        if rank < 1 or rank > 100:
             return None
 
         if chart_id in self.scores:
             scores = []
-            found = False
+            i = 1
             for key, value in self.scores[chart_id].items():
                 if rank == value['rank']:
                     scores.append(value)
-                    found = True
-                elif found:
-                    # since the scores are sorted by rank, we can break once we've found all the scores with the given rank
-                    break
+                elif rank == i:
+                    # score rank does not match actual rank, so there must be a tie with a higher rank
+                    return await self.query_rank(value['rank'], chart_id)
+
+                i += 1
 
             return scores
 
@@ -129,7 +133,7 @@ class Leaderboard:
 class GuildLeaderboard:
     PLAYERS_SAVE_FILE = 'players.txt'
 
-    def __init__(self, guild_name):
+    def __init__(self, guild_name: str):
         """ Initialize the guild's leaderboard.
         @param guild_name: the guild's name
         """
@@ -140,7 +144,7 @@ class GuildLeaderboard:
                 for line in f:
                     self.players.add(line.strip())
 
-    async def add_player(self, player_id) -> bool:
+    async def add_player(self, player_id: str) -> bool:
         """ Add a player to the guild's leaderboard. If the player is already being tracked, do nothing.
         Players that are being tracked will have their leaderboard updates automatically sent to the guild's 'piu-leaderboard' channel.
         @param player_id: the player's ID, in the format of name#tag
@@ -153,7 +157,7 @@ class GuildLeaderboard:
         await self.save()
         return added
 
-    async def remove_player(self, player_id) -> bool:
+    async def remove_player(self, player_id: str) -> bool:
         """ Remove a player from the guild's leaderboard. If the player is not being tracked, do nothing.
         @param player_id: the player's ID, in the format of name#tag
         @return: True if the player was removed, False otherwise
@@ -165,7 +169,7 @@ class GuildLeaderboard:
         await self.save()
         return removed
 
-    async def get_leaderboard_updates(self, channel):
+    async def get_leaderboard_updates(self, channel: discord.TextChannel):
         """ Get the leaderboard updates for all the players being tracked in the guild.
         @param channel: the channel to send the updates to
         @return: None
@@ -180,7 +184,7 @@ class GuildLeaderboard:
 class LeaderboardCrawler(scrapy.Spider):
     name = 'leaderboard_spider'
 
-    def __init__(self, leaderboard_urls, scores):
+    def __init__(self, leaderboard_urls: List[str], scores: dict):
         """Initialize the leaderboard crawler.
         @param leaderboard_urls: dict of { url : Chart }
         @param scores: dict of { chart_id : dict of { player_id : Score } }

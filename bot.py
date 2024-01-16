@@ -37,7 +37,7 @@ class CustomHelpCommand(commands.HelpCommand):
 
         pages.append('\nParameters (case-insensitive): ')
         pages.append('\tplayer_id  name[#tag]                       | if #tag is not specified, all scores with a matching name will be returned\n'
-                     '\tlevel_id   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...')
+                     '\tchart_id   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...')
 
         await self.get_destination().send('```' + '\n'.join(pages) + '```')
 
@@ -89,30 +89,32 @@ async def untrack(ctx, player_id: str):
         await ctx.send(f'Player {player_id} is not being tracked.')
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
-async def queryp(ctx, player_id: str, level_id: str):
+async def queryp(ctx, player_id: str, chart_id: str):
     async with ctx.typing():
-        scores = await leaderboard.query_score(player_id, level_id)
+        if await leaderboard.rescrape(chart_id):
+            scores = await leaderboard.query_score(player_id, chart_id)
 
-        if scores is None:
-            await ctx.send(f'`"{level_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
-        elif len(scores) == 0:
-            await ctx.send(f'{player_id} is not on the leaderboard for {level_id}.')
-        else:
-            for score in scores:
-                await ctx.send(embed=score.embed())
+            if scores is None:
+                await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+            elif len(scores) == 0:
+                await ctx.send(f'{player_id} is not on the leaderboard for {chart_id}.')
+            else:
+                for score in scores:
+                    await ctx.send(embed=score.embed())
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
-async def queryr(ctx, rank: int, level_id: str):
+async def queryr(ctx, rank: int, chart_id: str):
     async with ctx.typing():
-        scores = await leaderboard.query_rank(rank, level_id)
+        if await leaderboard.rescrape(chart_id):
+            scores = await leaderboard.query_rank(rank, chart_id)
 
-        if scores is None:
-            await ctx.send(f'`"{level_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
-        elif len(scores) == 0:
-            await ctx.send(f'No scores with rank {rank} on {level_id}.')
-        else:
-            for score in scores:
-                await ctx.send(embed=score.embed())
+            if scores is None:
+                await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+            elif len(scores) == 0:
+                await ctx.send(f'No scores with rank {rank} on {chart_id}.')
+            else:
+                for score in scores:
+                    await ctx.send(embed=score.embed())
 
 @tasks.loop(minutes=60)
 async def update_leaderboard():
