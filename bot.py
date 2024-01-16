@@ -39,8 +39,6 @@ class CustomHelpCommand(commands.HelpCommand):
         pages.append('\tplayer_id  name[#tag]                       | if #tag is not specified, all scores with a matching name will be returned\n'
                      '\tlevel_id   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...')
 
-
-
         await self.get_destination().send('```' + '\n'.join(pages) + '```')
 
 
