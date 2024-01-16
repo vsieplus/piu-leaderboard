@@ -55,9 +55,12 @@ class Score(dict):
         rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} #' if self['rank'] in RANKING_EMOJIS else '#'
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
+
+        formatted_score = format(self['score'], ',')
+
         embed =  discord.Embed(
             title=f'{avatar_emoji}{self["player"]}',
-            description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{format(self["score"], ',')}',
+            description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{formatted_score}',
             color=embed_color,
         )
 
