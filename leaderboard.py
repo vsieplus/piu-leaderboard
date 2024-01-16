@@ -75,7 +75,6 @@ class Leaderboard:
             if '#' in player_id:
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
             else:
-                breakpoint()
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]]
 
         return None
