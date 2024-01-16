@@ -29,6 +29,19 @@ RANKING_EMOJIS = {
     3 : '<:bronzemedal:1190380046846787666>'
 }
 
+RANKING_SUFFIXES = {
+    1 : 'st',
+    2 : 'nd',
+    3 : 'rd',
+    4 : 'th',
+    5 : 'th',
+    6 : 'th',
+    7 : 'th',
+    8 : 'th',
+    9 : 'th',
+    0 : 'th',
+}
+
 AVATAR_EMOJIS = {
     '4f617606e7751b2dc2559d80f09c40bf' : '<:avatar_1:1196561981499523234>'
 }
@@ -46,21 +59,23 @@ MODE_ICON_URLS = {
 }
 
 class Score(dict):
-    def __init__(self, chart: Chart, player: str, score: int, rank: int, avatar_id: str, date: str):
-        dict.__init__(self, player=player, score=score, rank=rank, grade=Score.calculate_grade(score), avatar_id=avatar_id, date=date)
+    def __init__(self, chart: Chart, player: str, score: int, rank: int, tie_count: int, avatar_id: str, date: str):
+        dict.__init__(self, player=player, score=score, rank=rank, tie_count=tie_count, grade=Score.calculate_grade(score), avatar_id=avatar_id, date=date)
         self.chart = chart
 
     def embed(self) -> discord.Embed:
         embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
-        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} #' if self['rank'] in RANKING_EMOJIS else '#'
+        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
 
+        rank_suffix = RANKING_SUFFIXES[self['rank'] % 10]
+        tied_text = f' ({self["tie_count"]}-way tie)' if self['tie_count'] > 1 else ''
         formatted_score = format(self['score'], ',')
 
         embed =  discord.Embed(
             title=f'{avatar_emoji}{self["player"]}',
-            description=f'{rank_emoji}{self["rank"]}\n{grade_emoji}{formatted_score}',
+            description=f'{rank_emoji}*{self["rank"]}{rank_suffix}*{tied_text}\n{grade_emoji}*{formatted_score}*',
             color=embed_color,
         )
 

@@ -202,8 +202,14 @@ class LeaderboardCrawler(scrapy.Spider):
         chart = self.charts[response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.request.url]
         self.scores[chart['chart_id'].lower()] = dict()
 
+        tie_count = 1
+        previous_rank = 0
+        previous_player_id = ''
+        curr_tied_players = []
+
         ranking_list = response.xpath('//div[@class="rangking_list_w"]//ul[@class="list"]/li')
-        for ranking in ranking_list:
+
+        for i, ranking in enumerate(ranking_list):
             ranking_info = ranking.xpath('.//div[@class="in flex vc wrap"]')
 
             rank = self.parse_rank(ranking_info)
@@ -212,7 +218,27 @@ class LeaderboardCrawler(scrapy.Spider):
             avatar_id = self.parse_avatar_id(ranking_info)
             date = self.parse_date(ranking)
 
-            self.scores[chart['chart_id'].lower()][player_id] = Score(chart, player_id, score, rank, avatar_id, date)
+            if rank == previous_rank:
+                if tie_count == 1:
+                    # make sure to count first tie
+                    curr_tied_players.append(previous_player_id)
+
+                curr_tied_players.append(player_id)
+                tie_count += 1
+
+            if i == len(ranking_list) - 1 or (rank != previous_rank and tie_count > 1):
+                # set the tie count for all tied players
+                for tied_player_id in curr_tied_players:
+                    self.scores[chart['chart_id'].lower()][tied_player_id]['tie_count'] = tie_count
+
+                # reset tie count
+                tie_count = 1
+                curr_tied_players = []
+
+            self.scores[chart['chart_id'].lower()][player_id] = Score(chart, player_id, score, rank, 1, avatar_id, date)
+
+            previous_rank = rank
+            previous_player_id = player_id
 
     def parse_rank(self, ranking_info) -> int:
         """Parse the player's rank.
