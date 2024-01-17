@@ -9,12 +9,12 @@ SAVE_DIR = 'data'
 class GuildLeaderboard:
     PLAYERS_SAVE_FILE = 'players.txt'
 
-    def __init__(self, guild_name: str):
+    def __init__(self, guild_id: str):
         """ Initialize the guild's leaderboard.
-        @param guild_name: the guild's name
+        @param guild_id: the guild's name
         """
         self.players = set()
-        self.players_file = os.path.join(SAVE_DIR, f'{guild_name}_{self.PLAYERS_SAVE_FILE}')
+        self.players_file = os.path.join(SAVE_DIR, f'{guild_id}_{self.PLAYERS_SAVE_FILE}')
         if os.path.isfile(self.players_file):
             with open(self.players_file, 'r') as f:
                 for line in f:

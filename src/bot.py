@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from bot_help import LeaderboardHelpCommand
 from guild_leaderboard import GuildLeaderboard
 from leaderboard import Leaderboard
+from leaderboard_dict import LeaderboardDict
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -20,7 +21,7 @@ INT_ERR_MSG  = '. One or more of the arguments could not be parsed as an integer
 LVL_NOT_FOUND_MSG = '`"{}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`'
 QUERY_ERR_MSG = 'An error occurred while querying the leaderboard. Please try again later'
 
-leaderboards = dict()
+leaderboards = LeaderboardDict(GuildLeaderboard)
 leaderboard = Leaderboard()
 
 intents = discord.Intents.default()
@@ -31,14 +32,14 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     for guild in bot.guilds:
-        leaderboards[guild.name] = GuildLeaderboard(guild.name)
+        leaderboards[guild.id] = GuildLeaderboard(guild.id)
 
         print(
             f'{bot.user} is connected to the following guild:\n'
             f'{guild.name}(id: {guild.id})'
         )
 
-    update_leaderboard.start()
+    #update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -52,7 +53,7 @@ async def track(ctx, player_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
-    if await leaderboards[ctx.guild.name].add_player(player_id):
+    if await leaderboards[ctx.guild.id].add_player(player_id):
         await ctx.send(f'Now tracking player {player_id}')
     else:
         await ctx.send(f'Player {player_id} is already being tracked')
@@ -62,7 +63,7 @@ async def untrack(ctx, player_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
-    if await leaderboards[ctx.guild.name].remove_player(player_id):
+    if await leaderboards[ctx.guild.id].remove_player(player_id):
         await ctx.send(f'No longer tracking player {player_id}')
     else:
         await ctx.send(f'Player {player_id} is not being tracked')
@@ -72,7 +73,7 @@ async def tracking(ctx):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
-    player_names = "\n".join(leaderboards[ctx.guild.name].players)
+    player_names = "\n".join(leaderboards[ctx.guild.id].players)
     player_names = discord.utils.escape_markdown(player_names)
     player_names = player_names.replace('\\#', '＃')
     await ctx.send(f'Currently tracking the following players: ```{player_names}```')
@@ -157,7 +158,7 @@ async def update_leaderboard():
         # only send updates in the 'piu-leaderboard' channel
         for channel in guild.text_channels:
             if channel.name == CHANNEL_NAME:
-                await leaderboards[guild.name].get_leaderboard_updates(leaderboard, channel)
+                await leaderboards[guild.id].get_leaderboard_updates(leaderboard, channel)
                 breakpoint()
 
 bot.help_command = LeaderboardHelpCommand()
