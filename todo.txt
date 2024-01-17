@@ -1,6 +1,3 @@
 - automatic updates
   - track placement/score changes
   - async updating?
-- decorate logo
-- handle rank queries properly when ties exist
-  - e.g. query rank 2 when there's a 3 way-tie for 1st should ?
