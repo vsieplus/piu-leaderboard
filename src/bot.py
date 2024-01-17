@@ -73,10 +73,13 @@ async def tracking(ctx):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
-    player_names = "\n".join(leaderboards[ctx.guild.id].players)
-    player_names = discord.utils.escape_markdown(player_names)
-    player_names = player_names.replace('\\#', '＃')
-    await ctx.send(f'Currently tracking the following players: ```{player_names}```')
+    if len(leaderboards[ctx.guild.id].players) == 0:
+        await ctx.send('No players are currently being tracked')
+    else:
+        player_names = "\n".join(leaderboards[ctx.guild.id].players)
+        player_names = discord.utils.escape_markdown(player_names)
+        player_names = player_names.replace('\\#', '＃')
+        await ctx.send(f'Currently tracking the following players: ```{player_names}```')
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
 async def queryp(ctx, player_id: str, chart_id: str):
