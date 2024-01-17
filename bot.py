@@ -88,6 +88,13 @@ async def untrack(ctx, player_id: str):
     else:
         await ctx.send(f'Player {player_id} is not being tracked.')
 
+@bot.command(name='tracking', help='List all players being currently tracked')
+async def tracking(ctx):
+    player_names = "\n".join(leaderboards[ctx.guild.name].players)
+    player_names = discord.utils.escape_markdown(player_names)
+    player_names = player_names.replace('\\#', '＃')
+    await ctx.send(f'Currently tracking the following players: ```{player_names}```')
+
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
 async def queryp(ctx, player_id: str, chart_id: str):
     async with ctx.typing():
