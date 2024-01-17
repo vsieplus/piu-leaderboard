@@ -1,6 +1,9 @@
 # bot.py
 
+import datetime
+import logging
 import os
+import sys
 from typing import List
 
 import discord
@@ -28,17 +31,24 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+
+file_handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
 @bot.event
 async def on_ready():
+    logger.info(f'{bot.user} is connected to the following guilds:')
+
     for guild in bot.guilds:
         leaderboards[guild.id] = GuildLeaderboard(guild.id)
+        logger.info(f'{guild.name}(id: {guild.id})')
 
-        print(
-            f'{bot.user} is connected to the following guild:\n'
-            f'{guild.name}(id: {guild.id})'
-        )
-
-    #update_leaderboard.start()
+    update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
@@ -154,18 +164,18 @@ async def get_rank_range(ctx: commands.Context, rank: str) -> List[int]:
 
     return rank_range
 
-@tasks.loop(minutes=120)
+@tasks.loop(minutes=90)
 async def update_leaderboard():
-    print('Updating leaderboard')
+    logger.info('Updating leaderboards')
     await leaderboard.update_all()
-    print('Leaderboard updated')
+    logger.info('Leaderboards updated')
 
     for guild in bot.guilds:
         for channel in guild.text_channels:
             if channel.name == CHANNEL_NAME:
                 await leaderboards[guild.id].get_leaderboard_updates(leaderboard, channel)
 
-    print('Leaderboard updates sent')
+    logger.info('Leaderboard updates sent')
 
 bot.help_command = LeaderboardHelpCommand()
 bot.run(TOKEN)
