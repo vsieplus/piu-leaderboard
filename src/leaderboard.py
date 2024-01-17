@@ -92,8 +92,9 @@ class Leaderboard:
         else:
             best_matches = await self.get_best_matches(chart_id)
             if len(best_matches) > 0:
+                best_matches_str = "\n".join([f"{i + 1}. {match[0].title()}" for i, match in enumerate(best_matches)])
                 await ctx.send(f'Chart `{chart_id}` not found. Did you mean one of the following?\n'
-                               f'```{'\n'.join([f"{i + 1}. {match[0].title()}" for i, match in enumerate(best_matches)])}```')
+                               f'```{best_matches_str}```')
             try:
                 # Wait for a message from the user who invoked the command
                 message = await bot.wait_for('message', check=lambda m: m.author == ctx.author, timeout=60.0)
