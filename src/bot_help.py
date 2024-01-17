@@ -29,8 +29,8 @@ class LeaderboardHelpCommand(commands.HelpCommand):
                 pages.append(f'\t{command.qualified_name}{cmd_spaces}{self.get_command_signature(command)}{sig_spaces}{command.help}')
 
         pages.append('\nParameters (case-insensitive): ')
-        pages.append('\tchart_id   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...\n'
-                     '\tplayer_id  name[#tag]                       | if #tag is not specified, all scores with a matching name will be returned\n'
-                     '\trank       rank[-rank]                      | ranks must be between 1 and 100; can optionally specify a range of ranks to query\n')
+        pages.append('\t<chart_id>   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...\n'
+                     '\t<player_id>  name[#tag]                       | if #tag is not specified, all scores with a matching name will be returned\n'
+                     '\t<rank>       rank[-rank]                      | ranks must be between 1 and 100; can optionally specify a range of ranks to query\n')
 
         await self.get_destination().send('```' + '\n'.join(pages) + '```')
