@@ -47,9 +47,11 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
 
-
 @bot.command(name='track', help='Begin tracking a player\'s scores')
 async def track(ctx, player_id: str):
+    if ctx.channel.name != CHANNEL_NAME:
+        return
+
     if await leaderboards[ctx.guild.name].add_player(player_id):
         await ctx.send(f'Now tracking player {player_id}')
     else:
@@ -57,6 +59,9 @@ async def track(ctx, player_id: str):
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
 async def untrack(ctx, player_id: str):
+    if ctx.channel.name != CHANNEL_NAME:
+        return
+
     if await leaderboards[ctx.guild.name].remove_player(player_id):
         await ctx.send(f'No longer tracking player {player_id}')
     else:
@@ -64,6 +69,9 @@ async def untrack(ctx, player_id: str):
 
 @bot.command(name='tracking', help='List all players being currently tracked')
 async def tracking(ctx):
+    if ctx.channel.name != CHANNEL_NAME:
+        return
+
     player_names = "\n".join(leaderboards[ctx.guild.name].players)
     player_names = discord.utils.escape_markdown(player_names)
     player_names = player_names.replace('\\#', '＃')
@@ -71,6 +79,9 @@ async def tracking(ctx):
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
 async def queryp(ctx, player_id: str, chart_id: str):
+    if ctx.channel.name != CHANNEL_NAME:
+        return
+
     async with ctx.typing():
         if await leaderboard.rescrape(chart_id):
             scores = await leaderboard.query_score(player_id, chart_id)
@@ -88,6 +99,9 @@ async def queryp(ctx, player_id: str, chart_id: str):
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
 async def queryr(ctx, rank: str, chart_id: str):
+    if ctx.channel.name != CHANNEL_NAME:
+        return
+
     async with ctx.typing():
         if await leaderboard.rescrape(chart_id):
             rank_range = await get_rank_range(ctx, rank)
