@@ -21,7 +21,7 @@ Once the bot is in your server, you should create a new text channel titled `piu
 !queryp <player_id> <chart_id>
 
 # Query a specific rank or range of ranks on a chart
-!queryr <chart_id> <rank>
+!queryr <rank> <chart_id>
 ```
 
 ### Player tracking
