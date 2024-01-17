@@ -85,6 +85,8 @@ class Leaderboard:
         @param chart_id: the level's ID
         @return: list(Score) of all matching players' scores on the given level
         """
+        chart_id = chart_id.lower()
+
         if chart_id in self.scores:
             if '#' in player_id:
                 return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
@@ -102,6 +104,8 @@ class Leaderboard:
         # verify rank is between 1 and 100
         if rank < 1 or rank > 100:
             return None
+
+        chart_id = chart_id.lower()
 
         if chart_id in self.scores:
             scores = []
