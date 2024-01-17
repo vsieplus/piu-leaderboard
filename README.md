@@ -43,8 +43,8 @@ The following parameters are used in some of the commands above. All are case-in
 | Parameter | Description |
 | --- | :--- |
 | `player_id` | The player's ID on the leaderboard in the format of `name[#tag]`, where `#tag` is the 4-digit discriminator. If `#tag` is not specified, the bot will search for all players with the name. |
-| `chart_id` | The ID of the chart to query in the format of `"Song title (S/D/Co-op)(Level)"`. This parameter must be enclosed in quotes. For Co-op chart levels, use x2, x3, etc...  |
-| `rank` | The rank or range of ranks to query. To query a range, use the format `rank1-rank2`, where `rank1 < rank2`. Queried ranks must be between 1 and 100.  |
+| `chart_id` | The ID of the chart to query in the format of `"Song title (S/D/Co-op)(Level)"`. This parameter must be enclosed in quotes. For Co-op chart levels, use x2, x3, etc... If an exact match cannot be found, the bot will provide a list of close matches you can choose from. |
+| `rank` | The rank or range of ranks to query. To query a range, use the format `rank1-rank2`, where `rank1 < rank2`. Ranks must be between 1 and 100.  |
 
 ## Examples
 
