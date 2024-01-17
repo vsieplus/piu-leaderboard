@@ -1,6 +1,6 @@
-<img align="left" style="width:96px" src="assets/logo.png" width="92px">
+<img align="left" style="width:92px" src="assets/logo.png" width="92px">
 
-*piu-leaderboard* is a discord bot which monitors the official leaderboards for [Pump it Up Phoenix](https://phoenix.piugame.com/leaderboard/over_ranking.php). The bot offers various commands for querying different chart leaderboards, as well as the ability to track specific players that the bot will automatically send leaderboard updates for.
+**piu-leaderboard** is a discord bot which monitors the official leaderboards for [Pump it Up Phoenix](https://phoenix.piugame.com/leaderboard/over_ranking.php). The bot offers various commands for querying different chart leaderboards, as well as the ability to track specific players that the bot will automatically send leaderboard updates for.
 
 ---
 
