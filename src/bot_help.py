@@ -2,8 +2,13 @@
 
 from discord.ext import commands
 
+CHANNEL_NAME = 'piu-leaderboard'
+
 class LeaderboardHelpCommand(commands.HelpCommand):
     async def send_bot_help(self, mapping):
+        if self.context.channel.name != 'piu-leaderboard':
+            return
+
         # Create a list to hold the pages
         pages = []
 
