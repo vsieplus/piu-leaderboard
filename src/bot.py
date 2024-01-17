@@ -17,6 +17,8 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 CHANNEL_NAME = 'piu-leaderboard'
 INVALID_RANK_RANGE_MSG = 'Invalid rank parameter. Please ensure you are using the format `rank` or `rank-rank`'
 INT_ERR_MSG  = '. One or more of the arguments could not be parsed as an integer'
+LVL_NOT_FOUND_MSG = '`"{}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`'
+QUERY_ERR_MSG = 'An error occurred while querying the leaderboard. Please try again later'
 
 leaderboards = dict()
 leaderboard = Leaderboard()
@@ -74,12 +76,15 @@ async def queryp(ctx, player_id: str, chart_id: str):
             scores = await leaderboard.query_score(player_id, chart_id)
 
             if scores is None:
-                await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+                await ctx.send(QUERY_ERR_MSG)
             elif len(scores) == 0:
                 await ctx.send(f'{player_id} is not on the leaderboard for {chart_id}')
             else:
                 for score in scores:
                     await ctx.send(embed=score.embed())
+        else:
+            await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
+
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
 async def queryr(ctx, rank: str, chart_id: str):
@@ -91,7 +96,7 @@ async def queryr(ctx, rank: str, chart_id: str):
                 for i in range(rank_range[0], rank_range[1] + 1):
                     curr_scores = await leaderboard.query_rank(i, chart_id)
                     if curr_scores is None:
-                        await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+                        await ctx.send(QUERY_ERR_MSG)
                         return
                     else:
                         scores.extend(curr_scores)
@@ -101,6 +106,8 @@ async def queryr(ctx, rank: str, chart_id: str):
                 else:
                     for score in scores:
                         await ctx.send(embed=score.embed())
+        else:
+            await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
 async def get_rank_range(ctx, rank: str) -> List[int]:
     rank = rank.replace(' ', '')
