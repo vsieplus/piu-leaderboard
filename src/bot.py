@@ -130,7 +130,7 @@ async def get_rank_range(ctx, rank: str) -> List[int]:
 
 @tasks.loop(minutes=60)
 async def update_leaderboard():
-    await leaderboard.update()
+    await leaderboard.update_all()
 
     for guild in bot.guilds:
         # only send updates in the 'piu-leaderboard' channel

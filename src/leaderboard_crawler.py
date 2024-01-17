@@ -10,7 +10,7 @@ from score import Score
 class LeaderboardCrawler(scrapy.Spider):
     name = 'leaderboard_spider'
 
-    def __init__(self, leaderboard_urls: List[str], scores: dict):
+    def __init__(self, leaderboard_urls: List[str], scores: dict, score_updates: List[tuple[Score, Score]]):
         """Initialize the leaderboard crawler.
         @param leaderboard_urls: dict of { url : Chart }
         @param scores: dict of { chart_id : dict of { player_id : Score } }
@@ -19,6 +19,7 @@ class LeaderboardCrawler(scrapy.Spider):
         self.start_urls = leaderboard_urls.keys()
         self.charts = leaderboard_urls
         self.scores = scores
+        self.score_updates = score_updates
 
     def parse(self, response):
         """Parse the leaderboard page.
@@ -26,7 +27,9 @@ class LeaderboardCrawler(scrapy.Spider):
         @return: None
         """
         chart = self.charts[response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.request.url]
-        self.scores[chart['chart_id'].lower()] = dict()
+        chart_key = chart['chart_id'].lower()
+
+        scores_dict = dict()
 
         tie_count = 1
         previous_rank = 0
@@ -55,16 +58,29 @@ class LeaderboardCrawler(scrapy.Spider):
             if i == len(ranking_list) - 1 or (rank != previous_rank and tie_count > 1):
                 # set the tie count for all tied players
                 for tied_player_id in curr_tied_players:
-                    self.scores[chart['chart_id'].lower()][tied_player_id]['tie_count'] = tie_count
+                    scores_dict[tied_player_id]['tie_count'] = tie_count
 
                 # reset tie count
                 tie_count = 1
                 curr_tied_players = []
 
-            self.scores[chart['chart_id'].lower()][player_id] = Score(chart, player_id, score, rank, 1, avatar_id, date)
+            scores_dict[player_id] = Score(chart, player_id, score, rank, 1, avatar_id, date)
 
             previous_rank = rank
             previous_player_id = player_id
+
+        # check for + store score updates
+        if chart_key in self.scores:
+            for player_id, score in scores_dict.items():
+                if player_id in self.scores[chart_key]:
+                    if score['score'] > self.scores[chart_key][player_id]['score']:
+                        # score has been updated
+                        self.score_updates.append((score, self.scores[chart_key][player_id]))
+                else:
+                    # new score
+                    self.score_updates.append((score, None))
+
+        self.scores[chart_key] = scores_dict
 
     def parse_rank(self, ranking_info) -> int:
         """Parse the player's rank.

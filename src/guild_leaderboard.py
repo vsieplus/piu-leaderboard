@@ -50,7 +50,7 @@ class GuildLeaderboard:
         @param channel: the channel to send the updates to
         @return: None
         """
-        for (new_score, prev_score) in leaderboard.updates:
+        for (new_score, prev_score) in await leaderboard.get_score_updates(self.players):
             await channel.send(embed=new_score.embed(prev_score))
 
     async def save(self):

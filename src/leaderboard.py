@@ -3,7 +3,7 @@
 import csv
 import json
 import os
-from typing import List
+from typing import List, Set
 
 from crochet import setup, wait_for
 from scrapy.crawler import CrawlerRunner
@@ -39,31 +39,39 @@ class Leaderboard:
         else :
             self.scores = dict()
 
-    async def update(self, chart_id=None):
-        """ Update the leaderboard(s)
-        @param chart_id: the chart's ID, lowercase; if None, update all chart leaderboards
+        self.score_updates = []
+
+    async def update(self, chart_id):
+        """ Update the leaderboard for a given chart.
+        @param chart_id: the chart's ID, lowercase
         @return: None
         """
         urls = {}
-        if chart_id is not None:
-            if chart_id in self.charts:
-                chart = self.charts[chart_id]
-                urls[chart.get_leaderboard_url()] = chart
-            else:
-                return
+        if chart_id is not None and chart_id in self.charts:
+            chart = self.charts[chart_id]
+            urls[chart.get_leaderboard_url()] = chart
         else:
-            for chart in self.charts.values():
-                urls[chart.get_leaderboard_url()] = chart
+            return
 
         self.run_crawl(urls)
+        await self.save()
 
+    async def update_all(self):
+        """ Update all chart leaderboards.
+        @return: None
+        """
+        urls = { chart.get_leaderboard_url() : chart for chart in self.charts.values() }
+
+        self.run_crawl(urls)
         await self.save()
 
     @wait_for(timeout=600.0)  # Adjust timeout as needed
     def run_crawl(self, urls):
+        self.score_updates.clear()
+
         runner = CrawlerRunner(get_project_settings())
         for url, chart in urls.items():
-            runner.crawl(LeaderboardCrawler, leaderboard_urls={ url : chart }, scores=self.scores)
+            runner.crawl(LeaderboardCrawler, leaderboard_urls={ url : chart }, scores=self.scores, score_updates=self.score_updates)
         d = runner.join()  # This returns a Deferred that fires when all crawling jobs have finished.
         return d
 
@@ -122,6 +130,13 @@ class Leaderboard:
             return scores
 
         return None
+
+    async def get_score_updates(players: Set[str]) -> List[tuple[Score, Score]]:
+        """ Get the leaderboard updates for all the players being tracked.
+        @param players: the players to get updates for
+        @return: list of (new_score, prev_score) tuples
+        """
+        pass
 
     async def save(self):
         """Save the leaderboard to a file in JSON format.
