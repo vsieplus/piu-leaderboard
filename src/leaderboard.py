@@ -1,6 +1,7 @@
 # leaderboard.py
 
 import asyncio
+import concurrent.futures
 import csv
 import json
 import os
@@ -56,7 +57,7 @@ class Leaderboard:
         else:
             return False
 
-        self.run_crawl(urls)
+        await self.crawl_in_thread(urls)
         await self.save()
 
         return True
@@ -67,16 +68,25 @@ class Leaderboard:
         """
         urls = { chart.get_leaderboard_url() : chart for chart in self.charts.values() }
 
-        self.run_crawl(urls)
+        await self.crawl_in_thread(urls)
         await self.save()
+
+    async def crawl_in_thread(self, urls: dict[str, Chart]):
+        """ Run the leaderboard crawler in a thread.
+        @param urls: dict of { url : Chart }
+        @return: None
+        """
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = loop.run_in_executor(executor, self.run_crawl, urls)
+            await future
 
     @wait_for(timeout=600.0)  # Adjust timeout as needed
     def run_crawl(self, urls):
         self.score_updates.clear()
 
         runner = CrawlerRunner(get_project_settings())
-        for url, chart in urls.items():
-            runner.crawl(LeaderboardCrawler, leaderboard_urls={ url : chart }, scores=self.scores, score_updates=self.score_updates)
+        runner.crawl(LeaderboardCrawler, leaderboard_urls=urls, scores=self.scores, score_updates=self.score_updates)
         d = runner.join()  # This returns a Deferred that fires when all crawling jobs have finished.
         return d
 
@@ -159,12 +169,17 @@ class Leaderboard:
 
         return None
 
-    async def get_score_updates(players: Set[str]) -> List[tuple[Score, Score]]:
+    async def get_score_updates(self, players: Set[str]) -> List[tuple[Score, Score]]:
         """ Get the leaderboard updates for all the players being tracked.
         @param players: the players to get updates for
         @return: list of (new_score, prev_score) tuples
         """
-        pass
+        updates = []
+        for (new_score, prev_score) in self.score_updates:
+            if new_score is not None and new_score['player'] in players:
+                updates.append((new_score, prev_score))
+
+        return updates
 
     async def save(self):
         """Save the leaderboard to a file in JSON format.
