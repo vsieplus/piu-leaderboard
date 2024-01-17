@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from bot_help import LeaderboardHelpCommand
+from bot_help import LeaderboardHelpCommand, CHANNEL_NAME
 from guild_leaderboard import GuildLeaderboard
 from leaderboard import Leaderboard
 from leaderboard_dict import LeaderboardDict
@@ -15,7 +15,6 @@ from leaderboard_dict import LeaderboardDict
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-CHANNEL_NAME = 'piu-leaderboard'
 INVALID_RANK_RANGE_MSG = 'Invalid rank parameter. Please ensure you are using the format `rank` or `rank-rank`'
 INT_ERR_MSG  = '. One or more of the arguments could not be parsed as an integer'
 LVL_NOT_FOUND_MSG = '`"{}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`'
@@ -153,16 +152,18 @@ async def get_rank_range(ctx, rank: str) -> List[int]:
 
     return rank_range
 
-@tasks.loop(minutes=60)
+@tasks.loop(minutes=120)
 async def update_leaderboard():
+    print('Updating leaderboard')
     await leaderboard.update_all()
+    print('Leaderboard updated')
 
     for guild in bot.guilds:
-        # only send updates in the 'piu-leaderboard' channel
         for channel in guild.text_channels:
             if channel.name == CHANNEL_NAME:
                 await leaderboards[guild.id].get_leaderboard_updates(leaderboard, channel)
-                breakpoint()
+
+    print('Leaderboard updates sent')
 
 bot.help_command = LeaderboardHelpCommand()
 bot.run(TOKEN)
