@@ -43,10 +43,12 @@ class CustomHelpCommand(commands.HelpCommand):
 
         await self.get_destination().send('```' + '\n'.join(pages) + '```')
 
-
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+
 CHANNEL_NAME = 'piu-leaderboard'
+INVALID_RANK_RANGE_MSG = 'Invalid rank parameter. Please ensure you are using the format `rank` or `rank-rank`'
+INT_ERR_MSG  = '. One or more of the arguments could not be parsed as an integer'
 
 leaderboards = dict()
 leaderboard = Leaderboard()
@@ -71,7 +73,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.errors.CommandNotFound):
-        await ctx.send('Command not found.')
+        await ctx.send('Command not found. Use `!help` to see a list of the available commands')
     elif isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
 
@@ -79,16 +81,16 @@ async def on_command_error(ctx, error):
 @bot.command(name='track', help='Begin tracking a player\'s scores')
 async def track(ctx, player_id: str):
     if await leaderboards[ctx.guild.name].add_player(player_id):
-        await ctx.send(f'Now tracking player {player_id}.')
+        await ctx.send(f'Now tracking player {player_id}')
     else:
-        await ctx.send(f'Player {player_id} is already being tracked.')
+        await ctx.send(f'Player {player_id} is already being tracked')
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
 async def untrack(ctx, player_id: str):
     if await leaderboards[ctx.guild.name].remove_player(player_id):
-        await ctx.send(f'No longer tracking player {player_id}.')
+        await ctx.send(f'No longer tracking player {player_id}')
     else:
-        await ctx.send(f'Player {player_id} is not being tracked.')
+        await ctx.send(f'Player {player_id} is not being tracked')
 
 @bot.command(name='tracking', help='List all players being currently tracked')
 async def tracking(ctx):
@@ -106,12 +108,10 @@ async def queryp(ctx, player_id: str, chart_id: str):
             if scores is None:
                 await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
             elif len(scores) == 0:
-                await ctx.send(f'{player_id} is not on the leaderboard for {chart_id}.')
+                await ctx.send(f'{player_id} is not on the leaderboard for {chart_id}')
             else:
                 for score in scores:
                     await ctx.send(embed=score.embed())
-
-INVALID_RANK_RANGE_MSG = 'Invalid rank range. Please ensure you are using the format `rank-rank`'
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
 async def queryr(ctx, rank: str, chart_id: str):
@@ -145,17 +145,17 @@ async def get_rank_range(ctx, rank: str) -> List[int]:
         try:
             rank_range = [int(rank_range[0]), int(rank_range[1])]
         except ValueError:
-            await ctx.send(INVALID_RANK_RANGE_MSG)
+            await ctx.send(f'{INVALID_RANK_RANGE_MSG}{INT_ERR_MSG}')
             return []
 
         if rank_range[0] > rank_range[1]:
-            await ctx.send(INVALID_RANK_RANGE_MSG)
+            await ctx.send(f'{INVALID_RANK_RANGE_MSG}. Invalid range provided')
             return []
     else:
         try:
             rank_range = [int(rank), int(rank)]
         except ValueError:
-            await ctx.send('Invalid rank. Please ensure you are using the format `rank` or `rank-rank`')
+            await ctx.send(f'{INVALID_RANK_RANGE_MSG}{INT_ERR_MSG}')
             return []
 
     return rank_range
