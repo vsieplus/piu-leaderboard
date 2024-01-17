@@ -1,11 +1,14 @@
 # leaderboard.py
 
+import asyncio
 import csv
 import json
 import os
 from typing import List, Set
 
 from crochet import setup, wait_for
+from fuzzywuzzy import process
+from discord.ext import commands
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 
@@ -23,7 +26,7 @@ class Leaderboard:
 
     def __init__(self):
         """Initialize the master leaderboard."""
-        # chart is dict of song_id : Chart
+        # chart is dict of { chart_id : Chart }
         self.charts = dict()
         if os.path.isfile(self.SONGLIST_SAVE_FILE):
             with open(self.SONGLIST_SAVE_FILE, 'r', encoding='utf-8') as f:
@@ -41,7 +44,7 @@ class Leaderboard:
 
         self.score_updates = []
 
-    async def update(self, chart_id):
+    async def update(self, chart_id: str) -> bool:
         """ Update the leaderboard for a given chart.
         @param chart_id: the chart's ID, lowercase
         @return: None
@@ -51,10 +54,12 @@ class Leaderboard:
             chart = self.charts[chart_id]
             urls[chart.get_leaderboard_url()] = chart
         else:
-            return
+            return False
 
         self.run_crawl(urls)
         await self.save()
+
+        return True
 
     async def update_all(self):
         """ Update all chart leaderboards.
@@ -75,17 +80,39 @@ class Leaderboard:
         d = runner.join()  # This returns a Deferred that fires when all crawling jobs have finished.
         return d
 
-    async def rescrape(self, chart_id: str) -> bool:
+    async def rescrape(self, bot: commands.Bot, ctx: commands.Context, chart_id: str) -> str:
         """ Rescrape the leaderboard for a given chart.
         @param chart_id: the chart's ID
-        @return: True if the chart was rescraped, False otherwise
+        @return: the chart's ID if a viable match was found, None otherwise
         """
         chart_id = chart_id.lower()
         if chart_id in self.charts:
-            await self.update(chart_id)
-            return True
+            if await self.update(chart_id):
+                return chart_id
+        else:
+            best_matches = await self.get_best_matches(chart_id)
+            if len(best_matches) > 0:
+                await ctx.send(f'Chart `{chart_id}` not found. Did you mean one of the following?\n'
+                               f'```{'\n'.join([f"{i + 1}. {match[0].title()}" for i, match in enumerate(best_matches)])}```')
+            try:
+                # Wait for a message from the user who invoked the command
+                message = await bot.wait_for('message', check=lambda m: m.author == ctx.author, timeout=60.0)
+                if message.content.isnumeric() and int(message.content) - 1 < len(best_matches):
+                    chart_id = best_matches[int(message.content) - 1][0]
+                    async with ctx.typing():
+                        if await self.update(chart_id):
+                            return chart_id
+            except asyncio.TimeoutError:
+                await ctx.send('Sorry, you took too long to respond.')
 
-        return False
+        return None
+
+    async def get_best_matches(self, chart_id: str) -> List[tuple[str, int]]:
+        """ Get the best matching chart ID for a given chart.
+        @param chart_id: the chart's ID
+        @return: the best matching chart IDs
+        """
+        return process.extractBests(chart_id, self.charts.keys(), score_cutoff=60, limit=10)
 
     async def query_score(self, player_id: str, chart_id: str) -> List[Score]:
         """ Query a player's score on a level.

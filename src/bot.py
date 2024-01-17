@@ -41,14 +41,14 @@ async def on_ready():
     #update_leaderboard.start()
 
 @bot.event
-async def on_command_error(ctx, error):
+async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
     if isinstance(error, commands.errors.CommandNotFound):
         await ctx.send('Command not found. Use `!help` to see a list of the available commands')
     elif isinstance(error, commands.errors.CheckFailure):
         await ctx.send('You do not have the correct role for this command.')
 
 @bot.command(name='track', help='Begin tracking a player\'s scores')
-async def track(ctx, player_id: str):
+async def track(ctx: commands.Context, player_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
@@ -58,7 +58,7 @@ async def track(ctx, player_id: str):
         await ctx.send(f'Player {player_id} is already being tracked')
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
-async def untrack(ctx, player_id: str):
+async def untrack(ctx: commands.Context, player_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
@@ -68,7 +68,7 @@ async def untrack(ctx, player_id: str):
         await ctx.send(f'Player {player_id} is not being tracked')
 
 @bot.command(name='tracking', help='List all players being currently tracked')
-async def tracking(ctx):
+async def tracking(ctx: commands.Context):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
@@ -81,12 +81,13 @@ async def tracking(ctx):
         await ctx.send(f'Currently tracking the following players: ```{player_names}```')
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
-async def queryp(ctx, player_id: str, chart_id: str):
+async def queryp(ctx: commands.Context, player_id: str, chart_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
     async with ctx.typing():
-        if await leaderboard.rescrape(chart_id):
+        if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
+            chart_id = new_chart_id
             scores = await leaderboard.query_score(player_id, chart_id)
 
             if scores is None:
@@ -101,12 +102,13 @@ async def queryp(ctx, player_id: str, chart_id: str):
 
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
-async def queryr(ctx, rank: str, chart_id: str):
+async def queryr(ctx: commands.Context, rank: str, chart_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
     async with ctx.typing():
-        if await leaderboard.rescrape(chart_id):
+        if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
+            chart_id = new_chart_id
             rank_range = await get_rank_range(ctx, rank)
             if rank_range and len(rank_range) >= 2:
                 scores = []
@@ -126,7 +128,7 @@ async def queryr(ctx, rank: str, chart_id: str):
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
-async def get_rank_range(ctx, rank: str) -> List[int]:
+async def get_rank_range(ctx: commands.Context, rank: str) -> List[int]:
     rank = rank.replace(' ', '')
     if '-' in rank:
         rank_range = rank.split('-')
