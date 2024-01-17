@@ -1,4 +1,6 @@
 crochet==2.1.1
 discord.py==2.3.2
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.23.0
 python-dotenv==1.0.0
 Scrapy==2.5.1
