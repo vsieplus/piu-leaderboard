@@ -131,7 +131,7 @@ async def update_leaderboard():
         # only send updates in the 'piu-leaderboard' channel
         for channel in guild.text_channels:
             if channel.name == CHANNEL_NAME:
-                await leaderboards[guild.name].get_leaderboard_updates(channel)
+                await leaderboards[guild.name].get_leaderboard_updates(leaderboard, channel)
 
 bot.help_command = CustomHelpCommand()
 bot.run(TOKEN)

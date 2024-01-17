@@ -63,7 +63,7 @@ class Leaderboard:
 
         await self.save()
 
-    @wait_for(timeout=60.0)  # Adjust timeout as needed
+    @wait_for(timeout=600.0)  # Adjust timeout as needed
     def run_crawl(self, urls):
         runner = CrawlerRunner(get_project_settings())
         for url, chart in urls.items():
@@ -169,12 +169,13 @@ class GuildLeaderboard:
         await self.save()
         return removed
 
-    async def get_leaderboard_updates(self, channel: discord.TextChannel):
+    async def get_leaderboard_updates(self, leaderboard: Leaderboard, channel: discord.TextChannel):
         """ Get the leaderboard updates for all the players being tracked in the guild.
         @param channel: the channel to send the updates to
         @return: None
         """
-        await channel.send('Updating leaderboard...')
+        for (new_score, prev_score) in leaderboard.updates:
+            await channel.send(embed=new_score.embed(prev_score))
 
     async def save(self):
         with open(self.players_file, 'w', encoding='utf-8') as f:

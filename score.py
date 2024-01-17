@@ -1,5 +1,7 @@
 # score.py
 
+import re
+
 import discord
 
 from chart import Chart
@@ -63,19 +65,13 @@ class Score(dict):
         dict.__init__(self, player=player, score=score, rank=rank, tie_count=tie_count, grade=Score.calculate_grade(score), avatar_id=avatar_id, date=date)
         self.chart = chart
 
-    def embed(self) -> discord.Embed:
+    def embed(self, prev_score=None) -> discord.Embed:
         embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
-        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
-        grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
         avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
-
-        rank_suffix = RANKING_SUFFIXES[self['rank'] % 10]
-        tied_text = f' ({self["tie_count"]}-way tie)' if self['tie_count'] > 1 else ''
-        formatted_score = format(self['score'], ',')
 
         embed =  discord.Embed(
             title=f'{avatar_emoji}{self["player"]}',
-            description=f'{rank_emoji}*{self["rank"]}{rank_suffix}*{tied_text}\n{grade_emoji}*{formatted_score}*',
+            description=self.embed_description(prev_score),
             color=embed_color,
         )
 
@@ -85,6 +81,24 @@ class Score(dict):
         embed.set_footer(text=f'Date • {self["date"]}')
 
         return embed
+
+    def embed_description(self, prev_score) -> str:
+        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
+        grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
+
+        rank_suffix = RANKING_SUFFIXES[self['rank'] % 10]
+        tied_text = f' ({self["tie_count"]}-way tie)' if self['tie_count'] > 1 else ''
+        formatted_score = format(self['score'], ',')
+
+        if prev_score is None:
+            return f'{rank_emoji}*{self["rank"]}{rank_suffix}*{tied_text}\n' \
+                   f'{grade_emoji}*{formatted_score}*'
+        else:
+            prev_rank_suffix = RANKING_SUFFIXES[prev_score['rank'] % 10]
+            prev_formatted_score = format(prev_score['score'], ',')
+
+            return f'{rank_emoji}*{prev_score["rank"]}{prev_rank_suffix}* -> *{self["rank"]}{rank_suffix}*{tied_text}\n' \
+                   f'{grade_emoji}*{prev_formatted_score}* -> *{formatted_score}*'
 
     @classmethod
     def calculate_grade(cls, score: int) -> str:
