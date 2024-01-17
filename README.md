@@ -4,8 +4,6 @@
 
 *piu-leaderboard* is a discord bot which monitors the official leaderboards for [Pump it Up Phoenix](https://phoenix.piugame.com/leaderboard/over_ranking.php). The bot offers various commands for querying different chart leaderboards, as well as the ability to track specific players that the bot will automatically send leaderboard updates for.
 
-![]()
-
 ## Setup
 
 If you are an admin of a discord server and would like to add this bot to your server, you can do so by clicking this [link](https://discord.com/api/oauth2/authorize?client_id=1190188505947701248&permissions=265216&scope=bot). You will need to have the `Manage Server` permission to do this.
