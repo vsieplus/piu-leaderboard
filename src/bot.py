@@ -1,7 +1,7 @@
 # bot.py
 
 import os
-import random
+from typing import List
 
 import discord
 from discord.ext import commands, tasks
@@ -37,8 +37,9 @@ class CustomHelpCommand(commands.HelpCommand):
                 pages.append(f'\t{command.qualified_name}{cmd_spaces}{self.get_command_signature(command)}{sig_spaces}{command.help}')
 
         pages.append('\nParameters (case-insensitive): ')
-        pages.append('\tplayer_id  name[#tag]                       | if #tag is not specified, all scores with a matching name will be returned\n'
-                     '\tchart_id   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...')
+        pages.append('\tchart_id   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...\n'
+                     '\tplayer_id  name[#tag]                       | if #tag is not specified, all scores with a matching name will be returned\n'
+                     '\trank       rank[-rank]                      | ranks must be between 1 and 100; can optionally specify a range of ranks to query\n')
 
         await self.get_destination().send('```' + '\n'.join(pages) + '```')
 
@@ -110,19 +111,54 @@ async def queryp(ctx, player_id: str, chart_id: str):
                 for score in scores:
                     await ctx.send(embed=score.embed())
 
+INVALID_RANK_RANGE_MSG = 'Invalid rank range. Please ensure you are using the format `rank-rank`'
+
 @bot.command(name='queryr', help='Query a specific rank on a level')
-async def queryr(ctx, rank: int, chart_id: str):
+async def queryr(ctx, rank: str, chart_id: str):
     async with ctx.typing():
         if await leaderboard.rescrape(chart_id):
-            scores = await leaderboard.query_rank(rank, chart_id)
+            rank_range = await get_rank_range(ctx, rank)
+            if rank_range and len(rank_range) >= 2:
+                scores = []
+                for i in range(rank_range[0], rank_range[1] + 1):
+                    curr_scores = await leaderboard.query_rank(i, chart_id)
+                    if curr_scores is None:
+                        await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
+                        return
+                    else:
+                        scores.extend(curr_scores)
 
-            if scores is None:
-                await ctx.send(f'`"{chart_id}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`')
-            elif len(scores) == 0:
-                await ctx.send(f'No scores with rank {rank} on {chart_id}.')
-            else:
-                for score in scores:
-                    await ctx.send(embed=score.embed())
+                if len(scores) == 0:
+                    await ctx.send(f'No scores with rank(s) {rank} on {chart_id}.')
+                else:
+                    for score in scores:
+                        await ctx.send(embed=score.embed())
+
+async def get_rank_range(ctx, rank: str) -> List[int]:
+    rank = rank.replace(' ', '')
+    if '-' in rank:
+        rank_range = rank.split('-')
+        if len(rank_range) != 2:
+            await ctx.send(INVALID_RANK_RANGE_MSG)
+            return []
+
+        try:
+            rank_range = [int(rank_range[0]), int(rank_range[1])]
+        except ValueError:
+            await ctx.send(INVALID_RANK_RANGE_MSG)
+            return []
+
+        if rank_range[0] > rank_range[1]:
+            await ctx.send(INVALID_RANK_RANGE_MSG)
+            return []
+    else:
+        try:
+            rank_range = [int(rank), int(rank)]
+        except ValueError:
+            await ctx.send('Invalid rank. Please ensure you are using the format `rank` or `rank-rank`')
+            return []
+
+    return rank_range
 
 @tasks.loop(minutes=60)
 async def update_leaderboard():
