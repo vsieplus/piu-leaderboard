@@ -1,3 +1,0 @@
-- automatic updates
-  - track placement/score changes
-  - async updating?
