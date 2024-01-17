@@ -86,7 +86,7 @@ class Score(dict):
         rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
 
-        rank_suffix = RANKING_SUFFIXES[self['rank'] % 10]
+        rank_suffix = self.get_rank_suffix()
         tied_text = f' ({self["tie_count"]}-way tie)' if self['tie_count'] > 1 else ''
         formatted_score = format(self['score'], ',')
 
@@ -94,11 +94,19 @@ class Score(dict):
             return f'{rank_emoji}*{self["rank"]}{rank_suffix}*{tied_text}\n' \
                    f'{grade_emoji}*{formatted_score}*'
         else:
-            prev_rank_suffix = RANKING_SUFFIXES[prev_score['rank'] % 10]
+            prev_rank_suffix = prev_score.get_rank_suffix()
             prev_formatted_score = format(prev_score['score'], ',')
 
             return f'{rank_emoji}*{prev_score["rank"]}{prev_rank_suffix}* -> *{self["rank"]}{rank_suffix}*{tied_text}\n' \
                    f'{grade_emoji}*{prev_formatted_score}* -> *{formatted_score}*'
+
+    def get_rank_suffix(self) -> str:
+        rank = self['rank']
+
+        if rank >= 11 and rank <= 13:
+            return 'th'
+
+        return RANKING_SUFFIXES[rank % 10]
 
     @classmethod
     def calculate_grade(cls, score: int) -> str:
