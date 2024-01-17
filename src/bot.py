@@ -38,7 +38,7 @@ async def on_ready():
             f'{guild.name}(id: {guild.id})'
         )
 
-    #update_leaderboard.start()
+    update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -158,6 +158,7 @@ async def update_leaderboard():
         for channel in guild.text_channels:
             if channel.name == CHANNEL_NAME:
                 await leaderboards[guild.name].get_leaderboard_updates(leaderboard, channel)
+                breakpoint()
 
 bot.help_command = LeaderboardHelpCommand()
 bot.run(TOKEN)
