@@ -1,6 +1,6 @@
 # piu-leaderboard
 
-<img align="left" style="width:92px" src="assets/logo.png" width="92px">
+<img align="left" style="width:96px" src="assets/logo.png" width="92px">
 
 *piu-leaderboard* is a discord bot which monitors the official leaderboards for [Pump it Up Phoenix](https://phoenix.piugame.com/leaderboard/over_ranking.php). The bot offers various commands for querying different chart leaderboards, as well as the ability to track specific players that the bot will automatically send leaderboard updates for.
 
@@ -8,7 +8,7 @@
 
 If you are an admin of a discord server and would like to add this bot to your server, you can do so by clicking this [link](https://discord.com/api/oauth2/authorize?client_id=1190188505947701248&permissions=265216&scope=bot). You will need to have the `Manage Server` permission to do this.
 
-Once the bot is in your server, you should create a new channel titled `piu-leaderboard`. This is where the bot will post leaderboard updates and where users can interact with the bot. If you encounter any problems with the bot, please open an issue in this repo.
+Once the bot is in your server, you should create a new text channel titled `piu-leaderboard`. This is where the bot will post leaderboard updates and where users can interact with the bot. If you encounter any problems with the bot, please open an issue in this repo.
 
 ## Commands
 
@@ -45,6 +45,10 @@ The following parameters are used in some of the commands above. All are case-in
 
 ## Examples
 
+### Automatic updates for a tracked player
+
+![example3](assets/ex_track.png)
+
 ### Querying a player's rank on a chart
 
 ![example1](assets/ex_queryp.png) 
@@ -52,8 +56,6 @@ The following parameters are used in some of the commands above. All are case-in
 ### Querying multiple ranks on a chart
 
 ![example2](assets/ex_queryr.png)
-
-### Automatic updates for a tracked player
 
 ## License
 
