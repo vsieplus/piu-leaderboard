@@ -7,7 +7,8 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from leaderboard import GuildLeaderboard, Leaderboard
+from guild_leaderboard import GuildLeaderboard
+from leaderboard import Leaderboard
 
 class CustomHelpCommand(commands.HelpCommand):
     async def send_bot_help(self, mapping):
