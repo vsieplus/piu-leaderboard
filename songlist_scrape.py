@@ -10,7 +10,7 @@ from scrapy.crawler import CrawlerProcess
 
 BASE_URL = 'https://phoenix.piugame.com/leaderboard/over_ranking.php'
 START_URL = f'{BASE_URL}?&&page=1'
-OUTPUT_FILE = os.path.join('data', 'songlist1.csv')
+OUTPUT_FILE = os.path.join('data', 'songlist.csv')
 
 MODE_PREFIX_DICT = {
     'c': 'Co-op',
