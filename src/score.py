@@ -82,11 +82,11 @@ class Score(dict):
 
         return embed
 
-    def embed_description(self, prev_score) -> str:
+    def embed_description(self, prev_score: 'Score') -> str:
         rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
 
-        rank_suffix = self.get_rank_suffix()
+        rank_suffix = Score.get_rank_suffix(self['rank'])
         tied_text = f' ({self["tie_count"]}-way tie)' if self['tie_count'] > 1 else ''
         formatted_score = format(self['score'], ',')
 
@@ -94,15 +94,14 @@ class Score(dict):
             return f'{rank_emoji}*{self["rank"]}{rank_suffix}*{tied_text}\n' \
                    f'{grade_emoji}*{formatted_score}*'
         else:
-            prev_rank_suffix = prev_score.get_rank_suffix()
+            prev_rank_suffix = Score.get_rank_suffix(prev_score['rank'])
             prev_formatted_score = format(prev_score['score'], ',')
 
             return f'{rank_emoji}*{prev_score["rank"]}{prev_rank_suffix}* -> *{self["rank"]}{rank_suffix}*{tied_text}\n' \
                    f'{grade_emoji}*{prev_formatted_score}* -> *{formatted_score}*'
 
-    def get_rank_suffix(self) -> str:
-        rank = self['rank']
-
+    @classmethod
+    def get_rank_suffix(cls, rank) -> str:
         if rank >= 11 and rank <= 13:
             return 'th'
 
