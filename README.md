@@ -38,13 +38,13 @@ Once the bot is in your server, you should create a new text channel titled `piu
 
 ### Parameters
 
-The following parameters are used in some of the commands above. All are case-insensitive.
+The following parameters are used in some of the commands above. All parameters are case-insensitive.
 
-| Parameter | Description |
-| --- | :--- |
-| `player_id` | The player's ID on the leaderboard in the format of `name[#tag]`, where `#tag` is the 4-digit discriminator. If `#tag` is not specified, the bot will search for all players with the name. |
-| `chart_id` | The ID of the chart to query in the format of `"Song title (S/D/Co-op)(Level)"`. This parameter must be enclosed in quotes. For Co-op chart levels, use x2, x3, etc... If an exact match cannot be found, the bot will provide a list of close matches you can choose from. |
-| `rank` | The rank or range of ranks to query. To query a range, use the format `rank1-rank2`, where `rank1 < rank2`. Ranks must be between 1 and 100.  |
+| Parameter | Format | Description |
+| --- | --- | :--- |
+| `player_id` | `name[#tag]` | The player's ID on the leaderboard, where `#tag` is the 4-digit discriminator. If `#tag` is not specified, the bot will search for all players with the name. |
+| `chart_id` | `"Song title (S/D/Co-op)(Level)"` | The ID of the chart to query. This parameter must be enclosed in quotes. For Co-op chart levels, use x2, x3, etc... If an exact match cannot be found, the bot will provide a list of close matches you can choose from by responding `1-10`. |
+| `rank` | `rank[-rank2]` | The rank(s) to query. To query a range, you can append `-rank2`, where `rank2 > rank`. Ranks must be integers between 1 and 100.  |
 
 ## Examples
 
@@ -64,8 +64,6 @@ The following parameters are used in some of the commands above. All are case-in
 
 This project's code is available under the [MIT license](LICENSE).
 
-The icons were downloaded from the official [Pump it Up Phoenix webiste](https://phoenix.piugame.com/) and are property of Andamiro Co., Ltd.
+The icons were downloaded from the official [Pump it Up Phoenix webiste](https://phoenix.piugame.com/) and are property of Andamiro (except for the logo, which was drawn by me 🙂).
 
-The logo was drawn by me and is available under the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
-
-You can build upon this project however you wish! Feel free to open an issue or pull request if you have any suggestions or improvements to the bot, and I'll try to respond when I have the time 🙂
+You can build upon this project however you wish! Feel free to open an issue or pull request if you have any suggestions or improvements, and I'll try to respond when I have the chance.
