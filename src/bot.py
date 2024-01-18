@@ -117,7 +117,6 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
         return
 
     async with ctx.typing():
-        breakpoint()
         if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
             chart_id = new_chart_id
             rank_range = await get_rank_range(ctx, rank)
