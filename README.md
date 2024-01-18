@@ -48,17 +48,25 @@ The following parameters are used in some of the commands above. All parameters 
 
 ## Examples
 
-### Querying a player's rank on a chart
+### Querying
+
+#### Query a specific player's rank on a chart
 
 ![example1](assets/ex_queryp.png) 
 
-### Querying multiple ranks on a chart
+#### Query specific rank placement(s) on a chart
 
 ![example2](assets/ex_queryr.png)
 
-### Automatic updates for a tracked player
+### Player tracking
 
-![example3](assets/ex_track.png)
+#### Start tracking a player...
+
+![example3a](assets/ex_tracking.png)
+
+#### Then later on...
+
+![example3b](assets/ex_track.png)
 
 ## License
 
