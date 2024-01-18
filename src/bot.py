@@ -63,9 +63,9 @@ async def track(ctx: commands.Context, player_id: str):
         return
 
     if await leaderboards[ctx.guild.id].add_player(player_id):
-        await ctx.send(f'Now tracking player {player_id}')
+        await ctx.send(f'Now tracking player `{player_id}`')
     else:
-        await ctx.send(f'Player {player_id} is already being tracked')
+        await ctx.send(f'Player `{player_id}` is already being tracked')
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
 async def untrack(ctx: commands.Context, player_id: str):
@@ -73,9 +73,9 @@ async def untrack(ctx: commands.Context, player_id: str):
         return
 
     if await leaderboards[ctx.guild.id].remove_player(player_id):
-        await ctx.send(f'No longer tracking player {player_id}')
+        await ctx.send(f'No longer tracking player `{player_id}`')
     else:
-        await ctx.send(f'Player {player_id} is not being tracked')
+        await ctx.send(f'Player `{player_id}` is not being tracked')
 
 @bot.command(name='tracking', help='List all players being currently tracked')
 async def tracking(ctx: commands.Context):
@@ -103,7 +103,7 @@ async def queryp(ctx: commands.Context, player_id: str, chart_id: str):
             if scores is None:
                 await ctx.send(QUERY_ERR_MSG)
             elif len(scores) == 0:
-                await ctx.send(f'{player_id} is not on the leaderboard for {chart_id}')
+                await ctx.send(f'`{player_id}` is not on the leaderboard for {chart_id}')
             else:
                 for score in scores:
                     await ctx.send(embed=await score.embed(prev_score=None, compare=False))
