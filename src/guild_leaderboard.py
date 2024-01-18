@@ -2,9 +2,7 @@
 
 import os
 import discord
-from leaderboard import Leaderboard
-
-SAVE_DIR = 'data'
+from leaderboard import Leaderboard, SAVE_DIR
 
 class GuildLeaderboard:
     PLAYERS_SAVE_FILE = 'players.txt'

@@ -19,7 +19,7 @@ from leaderboard_crawler import LeaderboardCrawler
 
 setup()
 
-SAVE_DIR = 'data'
+SAVE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 
 class Leaderboard:
     LEADERBOARD_SAVE_FILE = os.path.join(SAVE_DIR, 'leaderboard.json')
