@@ -65,13 +65,13 @@ class Score(dict):
         dict.__init__(self, player=player, score=score, rank=rank, tie_count=tie_count, grade=Score.calculate_grade(score), avatar_id=avatar_id, date=date)
         self.chart = chart
 
-    async def embed(self, prev_score: 'Score', compare: bool) -> discord.Embed:
+    def embed(self, prev_score: 'Score', compare: bool) -> discord.Embed:
         embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
         avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
 
         embed =  discord.Embed(
             title=f'{avatar_emoji}{self["player"]}',
-            description=await self.embed_description(prev_score, compare),
+            description=self.embed_description(prev_score, compare),
             color=embed_color,
         )
 
@@ -82,7 +82,7 @@ class Score(dict):
 
         return embed
 
-    async def embed_description(self, prev_score: 'Score', compare: bool) -> str:
+    def embed_description(self, prev_score: 'Score', compare: bool) -> str:
         rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
         grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
 
