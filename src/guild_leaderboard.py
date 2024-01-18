@@ -51,7 +51,7 @@ class GuildLeaderboard:
         @return: None
         """
         for (new_score, prev_score) in await leaderboard.get_score_updates(self.players):
-            await channel.send(embed=new_score.embed(prev_score))
+            await channel.send(embed=new_score.embed(prev_score=prev_score, compare=True))
 
     async def save(self):
         with open(self.players_file, 'w', encoding='utf-8') as f:

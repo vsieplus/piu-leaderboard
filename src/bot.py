@@ -106,7 +106,7 @@ async def queryp(ctx: commands.Context, player_id: str, chart_id: str):
                 await ctx.send(f'{player_id} is not on the leaderboard for {chart_id}')
             else:
                 for score in scores:
-                    await ctx.send(embed=score.embed())
+                    await ctx.send(embed=score.embed(prev_score=None, compare=False))
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
