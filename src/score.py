@@ -66,7 +66,7 @@ class Score(dict):
         self.chart = chart
 
     def embed(self, prev_score: 'Score', compare: bool) -> discord.Embed:
-        embed_color = MODE_COLORS[self.chart['mode']] if self.chart['mode'] in MODE_COLORS else discord.Color.black()
+        embed_color = MODE_COLORS[self.chart.mode] if self.chart.mode in MODE_COLORS else discord.Color.black()
         avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
 
         embed =  discord.Embed(
@@ -75,9 +75,9 @@ class Score(dict):
             color=embed_color,
         )
 
-        icon_url = MODE_ICON_URLS[self.chart['mode']] if self.chart['mode'] in MODE_ICON_URLS else None
-        embed.set_author(name=self.chart['chart_id'], url=self.chart.get_leaderboard_url(), icon_url=icon_url)
-        embed.set_thumbnail(url=self.chart['thumbnail_url'])
+        icon_url = MODE_ICON_URLS[self.chart.mode] if self.chart.mode in MODE_ICON_URLS else None
+        embed.set_author(name=self.chart.chart_id, url=self.chart.get_leaderboard_url(), icon_url=icon_url)
+        embed.set_thumbnail(url=self.chart.thumbnail_url)
         embed.set_footer(text=f'Date • {self["date"]}')
 
         return embed

@@ -34,7 +34,7 @@ class Leaderboard:
                 reader = csv.DictReader(f)
                 for row in reader:
                     chart = Chart(row['title'], row['mode'], row['level'], row['id'], row['thumbnail'])
-                    self.charts[chart['chart_id'].lower()] = chart
+                    self.charts[chart.chart_id.lower()] = chart
 
         # scores is dict of { chart_id : dict of { player_id : Score } }
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):

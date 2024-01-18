@@ -27,7 +27,7 @@ class LeaderboardCrawler(scrapy.Spider):
         @return: None
         """
         chart = self.charts[response.request.meta['redirect_urls'][0] if 'redirect_urls' in response.request.meta else response.request.url]
-        chart_key = chart['chart_id'].lower()
+        chart_key = chart.chart_id.lower()
 
         scores_dict = dict()
 
