@@ -40,7 +40,10 @@ class Leaderboard:
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):
             with open(self.LEADERBOARD_SAVE_FILE, 'r', encoding='utf-8') as f:
                 self.scores = {
-                    chart_id: { player_id: Score.from_dict(score) for player_id, score in chart_scores.items() }
+                    chart_id: { 
+                        player_id: Score.from_dict(score, self.charts[chart_id] if chart_id in self.charts else None)
+                        for player_id, score in chart_scores.items() 
+                    }
                     for chart_id, chart_scores in json.load(f).items()
                 }
         else :

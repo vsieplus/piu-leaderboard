@@ -119,9 +119,9 @@ class Score():
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> 'Score':
+    def from_dict(cls, data: dict, chart: Chart) -> 'Score':
         return cls(
-            None,
+            chart,
             data['player'],
             data['score'],
             data['rank'],
