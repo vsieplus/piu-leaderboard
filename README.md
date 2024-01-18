@@ -62,4 +62,10 @@ The following parameters are used in some of the commands above. All are case-in
 
 ## License
 
-This project is available under the [MIT license](LICENSE). You can build upon this project however you wish. Feel free to open an issue or pull request if you have any suggestions or improvements, and I will try to respond when I have the time.
+This project's code is available under the [MIT license](LICENSE).
+
+The icons were downloaded from the official [Pump it Up Phoenix webiste](https://phoenix.piugame.com/) and are property of Andamiro Co., Ltd.
+
+The logo was drawn by me and is available under the [CC BY-SA 4.0 license](https://creativecommons.org/licenses/by-sa/4.0/).
+
+You can build upon this project however you wish! Feel free to open an issue or pull request if you have any suggestions or improvements to the bot, and I'll try to respond when I have the time 🙂
