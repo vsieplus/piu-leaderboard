@@ -1,4 +1,4 @@
-# scrape_songlist.py
+# songlist_crawler.py
 # Run this script to scrape the leaderboard songlist from the website and save it to a CSV file.
 
 import csv
