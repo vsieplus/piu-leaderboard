@@ -60,17 +60,23 @@ MODE_ICON_URLS = {
     'Co-op' : 'https://phoenix.piugame.com/l_img/stepball/full/c_bg.png'
 }
 
-class Score(dict):
+class Score():
     def __init__(self, chart: Chart, player: str, score: int, rank: int, tie_count: int, avatar_id: str, date: str):
-        dict.__init__(self, player=player, score=score, rank=rank, tie_count=tie_count, grade=Score.calculate_grade(score), avatar_id=avatar_id, date=date)
         self.chart = chart
+        self.player = player
+        self.score = score
+        self.grade = Score.calculate_grade(score)
+        self.rank = rank
+        self.tie_count = tie_count
+        self.avatar_id = avatar_id
+        self.date = date
 
     def embed(self, prev_score: 'Score', compare: bool) -> discord.Embed:
         embed_color = MODE_COLORS[self.chart.mode] if self.chart.mode in MODE_COLORS else discord.Color.black()
-        avatar_emoji = f'{AVATAR_EMOJIS[self["avatar_id"]]} ' if self['avatar_id'] in AVATAR_EMOJIS else ''
+        avatar_emoji = f'{AVATAR_EMOJIS[self.avatar_id]} ' if self.avatar_id in AVATAR_EMOJIS else ''
 
         embed =  discord.Embed(
-            title=f'{avatar_emoji}{self["player"]}',
+            title=f'{avatar_emoji}{self.player}',
             description=self.embed_description(prev_score, compare),
             color=embed_color,
         )
@@ -78,28 +84,51 @@ class Score(dict):
         icon_url = MODE_ICON_URLS[self.chart.mode] if self.chart.mode in MODE_ICON_URLS else None
         embed.set_author(name=self.chart.chart_id, url=self.chart.get_leaderboard_url(), icon_url=icon_url)
         embed.set_thumbnail(url=self.chart.thumbnail_url)
-        embed.set_footer(text=f'Date • {self["date"]}')
+        embed.set_footer(text=f'Date • {self.date}')
 
         return embed
 
     def embed_description(self, prev_score: 'Score', compare: bool) -> str:
-        rank_emoji = f'{RANKING_EMOJIS[self["rank"]]} ' if self['rank'] in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
-        grade_emoji = f'{GRADE_EMOJIS[self["grade"]]} ' if self['grade'] in GRADE_EMOJIS else ''
+        rank_emoji = f'{RANKING_EMOJIS[self.rank]} ' if self.rank in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
+        grade_emoji = f'{GRADE_EMOJIS[self.grade]} ' if self.grade in GRADE_EMOJIS else ''
 
-        rank_suffix = Score.get_rank_suffix(self['rank'])
-        tied_text = f' ({self["tie_count"]}-way tie)' if self['tie_count'] > 1 else ''
-        formatted_score = format(self['score'], ',')
+        rank_suffix = Score.get_rank_suffix(self.rank)
+        tied_text = f' ({self.tie_count}-way tie)' if self.tie_count > 1 else ''
+        formatted_score = format(self.score, ',')
 
         if prev_score is None:
             new_rank_text = ' (new)' if compare else ''
-            return f'{rank_emoji}*{self["rank"]}{rank_suffix}*{new_rank_text}{tied_text}\n' \
+            return f'{rank_emoji}*{self.rank}{rank_suffix}*{new_rank_text}{tied_text}\n' \
                    f'{grade_emoji}*{formatted_score}*'
         else:
-            prev_rank_suffix = Score.get_rank_suffix(prev_score['rank'])
-            prev_formatted_score = format(prev_score['score'], ',')
+            prev_rank_suffix = Score.get_rank_suffix(prev_score.rank)
+            prev_formatted_score = format(prev_score.score, ',')
 
-            return f'{rank_emoji}*{prev_score["rank"]}{prev_rank_suffix}* -> *{self["rank"]}{rank_suffix}*{tied_text}\n' \
+            return f'{rank_emoji}*{prev_score.rank}{prev_rank_suffix}* -> *{self.rank}{rank_suffix}*{tied_text}\n' \
                    f'{grade_emoji}*{prev_formatted_score}* -> *{formatted_score}*'
+
+    def to_dict(self) -> dict:
+        return {
+            'player' : self.player,
+            'score' : self.score,
+            'grade' : self.grade,
+            'rank' : self.rank,
+            'tie_count' : self.tie_count,
+            'avatar_id' : self.avatar_id,
+            'date' : self.date
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Score':
+        return cls(
+            None,
+            data['player'],
+            data['score'],
+            data['rank'],
+            data['tie_count'],
+            data['avatar_id'],
+            data['date'],
+        )
 
     @classmethod
     def get_rank_suffix(cls, rank) -> str:

@@ -58,13 +58,13 @@ class LeaderboardCrawler(scrapy.Spider):
             if i == len(ranking_list) - 1 or (rank != previous_rank and tie_count > 1):
                 # set the tie count for all tied players
                 for tied_player_id in curr_tied_players:
-                    scores_dict[tied_player_id]['tie_count'] = tie_count
+                    scores_dict[tied_player_id].tie_count = tie_count
 
                 # reset tie count
                 tie_count = 1
                 curr_tied_players = []
 
-            scores_dict[player_id] = Score(chart, player_id, score, rank, 1, avatar_id, date)
+            scores_dict[player_id] = Score(chart=chart, player=player_id, score=score, rank=rank, tie_count=tie_count, avatar_id=avatar_id, date=date)
 
             previous_rank = rank
             previous_player_id = player_id
@@ -73,7 +73,7 @@ class LeaderboardCrawler(scrapy.Spider):
         if chart_key in self.scores and len(self.scores[chart_key]) > 0:
             for player_id, score in scores_dict.items():
                 if player_id in self.scores[chart_key]:
-                    if score['score'] > self.scores[chart_key][player_id]['score']:
+                    if score.score > self.scores[chart_key][player_id].score:
                         # score has been updated
                         self.score_updates.append((score, self.scores[chart_key][player_id]))
                 else:

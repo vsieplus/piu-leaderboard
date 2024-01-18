@@ -33,13 +33,16 @@ class Leaderboard:
             with open(self.SONGLIST_SAVE_FILE, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
-                    chart = Chart(row['title'], row['mode'], row['level'], row['id'], row['thumbnail'])
+                    chart = Chart(title=row['title'], mode=row['mode'], level=row['level'], leaderboard_id=row['id'], thumbnail_url=row['thumbnail'])
                     self.charts[chart.chart_id.lower()] = chart
 
         # scores is dict of { chart_id : dict of { player_id : Score } }
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):
             with open(self.LEADERBOARD_SAVE_FILE, 'r', encoding='utf-8') as f:
-                self.scores = json.loads(f.read())
+                self.scores = {
+                    chart_id: { player_id: Score.from_dict(score) for player_id, score in chart_scores.items() }
+                    for chart_id, chart_scores in json.load(f).items()
+                }
         else :
             self.scores = dict()
 
@@ -157,11 +160,11 @@ class Leaderboard:
             scores = []
             i = 1
             for key, value in self.scores[chart_id].items():
-                if rank == value['rank']:
+                if rank == value.rank:
                     scores.append(value)
                 elif rank == i:
                     # score rank does not match actual rank, so there must be a tie with a higher rank
-                    return await self.query_rank(value['rank'], chart_id)
+                    return await self.query_rank(value.rank, chart_id)
 
                 i += 1
 
@@ -176,7 +179,7 @@ class Leaderboard:
         """
         updates = []
         for (new_score, prev_score) in self.score_updates:
-            if new_score is not None and new_score['player'] in players:
+            if new_score is not None and new_score.player in players:
                 updates.append((new_score, prev_score))
 
         return updates
@@ -186,4 +189,10 @@ class Leaderboard:
         @return: None
         """
         with open(self.LEADERBOARD_SAVE_FILE, 'w', encoding='utf-8') as f:
-            f.write(json.dumps(self.scores, indent=2))
+            f.write(
+                json.dumps(
+                    { chart_id: { player_id: score.to_dict() for player_id, score in chart_scores.items() }
+                        for chart_id, chart_scores in self.scores.items() },
+                    indent=2
+                )
+            )
