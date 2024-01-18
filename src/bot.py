@@ -117,6 +117,7 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
         return
 
     async with ctx.typing():
+        breakpoint()
         if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
             chart_id = new_chart_id
             rank_range = await get_rank_range(ctx, rank)
@@ -134,7 +135,7 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
                     await ctx.send(f'No scores with rank(s) {rank} on {chart_id}.')
                 else:
                     for score in scores:
-                        await ctx.send(embed=score.embed())
+                        await ctx.send(embed=score.embed(prev_score=None, compare=False))
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
