@@ -69,8 +69,8 @@ class LeaderboardCrawler(scrapy.Spider):
             previous_rank = rank
             previous_player_id = player_id
 
-        # check for + store score updates
-        if chart_key in self.scores:
+        # check for + store score updates if we have previous scores to compare to
+        if chart_key in self.scores and len(self.scores[chart_key]) > 0:
             for player_id, score in scores_dict.items():
                 if player_id in self.scores[chart_key]:
                     if score['score'] > self.scores[chart_key][player_id]['score']:
