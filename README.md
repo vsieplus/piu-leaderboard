@@ -70,4 +70,6 @@ The following parameters are used in some of the commands above. All parameters 
 
 ## License
 
-This project's code is available under the [MIT license](LICENSE). Feel free to open an issue or pull request if you have any suggestions or improvements, and I'll take a look when I get the chance.
+This project's code is available under the [MIT license](LICENSE). Feel free to open an issue or pull request if you encounter any issues with the bot, and/or have any suggestions or improvements to offer.
+
+The icons/emojis were taken from the official Pump it Up website and are property of Andamiro. The bot's logo was drawn by me and is free to use 🙂.
