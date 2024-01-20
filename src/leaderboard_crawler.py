@@ -5,12 +5,13 @@ from typing import List
 
 import scrapy
 
+from chart import Chart
 from score import Score
 
 class LeaderboardCrawler(scrapy.Spider):
     name = 'leaderboard_spider'
 
-    def __init__(self, leaderboard_urls: List[str], scores: dict, score_updates: List[tuple[Score, Score]]):
+    def __init__(self, leaderboard_urls: dict[str, Chart], scores: dict, score_updates: List[tuple[Score, Score]]):
         """Initialize the leaderboard crawler.
         @param leaderboard_urls: dict of { url : Chart }
         @param scores: dict of { chart_id : dict of { player_id : Score } }
@@ -55,6 +56,8 @@ class LeaderboardCrawler(scrapy.Spider):
                 curr_tied_players.append(player_id)
                 tie_count += 1
 
+            scores_dict[player_id] = Score(chart=chart, player=player_id, score=score, rank=rank, tie_count=tie_count, avatar_id=avatar_id, date=date)
+
             if i == len(ranking_list) - 1 or (rank != previous_rank and tie_count > 1):
                 # set the tie count for all tied players
                 for tied_player_id in curr_tied_players:
@@ -63,8 +66,6 @@ class LeaderboardCrawler(scrapy.Spider):
                 # reset tie count
                 tie_count = 1
                 curr_tied_players = []
-
-            scores_dict[player_id] = Score(chart=chart, player=player_id, score=score, rank=rank, tie_count=tie_count, avatar_id=avatar_id, date=date)
 
             previous_rank = rank
             previous_player_id = player_id
