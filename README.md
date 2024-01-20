@@ -9,7 +9,7 @@
 
 ## Setup
 
-If you are an admin of a discord server and would like to add this bot to your server, you can do so by clicking this [link](https://discord.com/api/oauth2/authorize?client_id=1190188505947701248&permissions=265216&scope=bot). You will need to have the `Manage Server` permission to do this.
+If you are an admin of a discord server and would like to add this bot to your server, you can do so by clicking this [link](https://discord.com/api/oauth2/authorize?client_id=1190188505947701248&permissions=265216&scope=bot).
 
 Once the bot is in your server, you should create a new text channel titled `piu-leaderboard`. This is where the bot will post leaderboard updates and where users can interact with the bot. If you encounter any problems with the bot, please open an issue in this repo.
 
@@ -64,7 +64,7 @@ The following parameters are used in some of the commands above. All parameters 
 
 ![example3a](assets/ex_tracking.png)
 
-#### Then later on...
+#### Later on, when they achieve a new/high score on a chart leaderboard:
 
 ![example3b](assets/ex_track.png)
 
@@ -72,6 +72,4 @@ The following parameters are used in some of the commands above. All parameters 
 
 This project's code is available under the [MIT license](LICENSE).
 
-The icons were downloaded from the official [Pump it Up Phoenix webiste](https://phoenix.piugame.com/) and are property of Andamiro (except for the logo, which was drawn by me 🙂).
-
-You can build upon this project however you wish! Feel free to open an issue or pull request if you have any suggestions or improvements, and I'll try to respond when I have the chance.
+Feel free to open an issue or pull request if you have any suggestions or improvements, and I'll take a look when I get the chance.
