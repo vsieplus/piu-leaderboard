@@ -70,6 +70,4 @@ The following parameters are used in some of the commands above. All parameters 
 
 ## License
 
-This project's code is available under the [MIT license](LICENSE).
-
-Feel free to open an issue or pull request if you have any suggestions or improvements, and I'll take a look when I get the chance.
+This project's code is available under the [MIT license](LICENSE). Feel free to open an issue or pull request if you have any suggestions or improvements, and I'll take a look when I get the chance.
