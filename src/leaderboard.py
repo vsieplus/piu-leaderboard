@@ -87,13 +87,13 @@ class Leaderboard:
             future = loop.run_in_executor(executor, self.run_crawl, urls)
             await future
 
-    @wait_for(timeout=600.0)  # Adjust timeout as needed
+    @wait_for(timeout=600.0)
     def run_crawl(self, urls):
         self.score_updates.clear()
 
         runner = CrawlerRunner(get_project_settings())
         runner.crawl(LeaderboardCrawler, leaderboard_urls=urls, scores=self.scores, score_updates=self.score_updates)
-        d = runner.join()  # This returns a Deferred that fires when all crawling jobs have finished.
+        d = runner.join()  # returns a Deferred that fires when all crawling jobs have finished
         return d
 
     async def rescrape(self, bot: commands.Bot, ctx: commands.Context, chart_id: str) -> str:
