@@ -122,13 +122,21 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
             rank_range = await get_rank_range(ctx, rank)
             if rank_range and len(rank_range) >= 2:
                 scores = []
-                for i in range(rank_range[0], rank_range[1] + 1):
+                i = rank_range[0]
+                while i <= rank_range[1]:
                     curr_scores = await leaderboard.query_rank(i, chart_id)
                     if curr_scores is None:
                         await ctx.send(QUERY_ERR_MSG)
                         return
                     else:
                         scores.extend(curr_scores)
+
+                        # skip to the next non-tied rank
+                        if len(curr_scores) > 1:
+                            i = curr_scores[0].rank + len(curr_scores)
+                            continue
+
+                    i += 1
 
                 if len(scores) == 0:
                     await ctx.send(f'No scores with rank(s) {rank} on {chart_id}.')
