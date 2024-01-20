@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
 
-from bot_help import LeaderboardHelpCommand, CHANNEL_NAME
+from bot_help import LeaderboardHelpCommand, COMMAND_CHANNELS, UPDATE_CHANNELS
 from guild_leaderboard import GuildLeaderboard
 from leaderboard import Leaderboard
 from leaderboard_dict import LeaderboardDict
@@ -59,7 +59,7 @@ async def on_command_error(ctx: commands.Context, error: commands.errors.Command
 
 @bot.command(name='track', help='Begin tracking a player\'s scores')
 async def track(ctx: commands.Context, player_id: str):
-    if ctx.channel.name != CHANNEL_NAME:
+    if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     if await leaderboards[ctx.guild.id].add_player(player_id):
@@ -69,7 +69,7 @@ async def track(ctx: commands.Context, player_id: str):
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
 async def untrack(ctx: commands.Context, player_id: str):
-    if ctx.channel.name != CHANNEL_NAME:
+    if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     if await leaderboards[ctx.guild.id].remove_player(player_id):
@@ -79,7 +79,7 @@ async def untrack(ctx: commands.Context, player_id: str):
 
 @bot.command(name='tracking', help='List all players being currently tracked')
 async def tracking(ctx: commands.Context):
-    if ctx.channel.name != CHANNEL_NAME:
+    if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     if len(leaderboards[ctx.guild.id].players) == 0:
@@ -92,7 +92,7 @@ async def tracking(ctx: commands.Context):
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
 async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
-    if ctx.channel.name != CHANNEL_NAME:
+    if ctx.channel.name  not in COMMAND_CHANNELS:
         return
 
     async with ctx.typing():
@@ -117,7 +117,7 @@ async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
 async def queryr(ctx: commands.Context, rank: str, chart_id: str):
-    if ctx.channel.name != CHANNEL_NAME:
+    if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     async with ctx.typing():
@@ -184,8 +184,9 @@ async def update_leaderboard():
 
     for guild in bot.guilds:
         for channel in guild.text_channels:
-            if channel.name == CHANNEL_NAME:
+            if channel.name in UPDATE_CHANNELS:
                 await leaderboards[guild.id].get_leaderboard_updates(leaderboard, channel)
+                break
 
     logger.info('Leaderboard updates sent')
 

@@ -2,11 +2,16 @@
 
 from discord.ext import commands
 
-CHANNEL_NAME = 'piu-leaderboard'
+DEFAULT_CHANNEL_NAME = 'piu-leaderboard'
+UPDATES_CHANNEL_NAME = 'piu-leaderboard-updates'
+COMMANDS_CHANNEL_NAME = 'piu-leaderboard-commands'
+
+UPDATE_CHANNELS = set([DEFAULT_CHANNEL_NAME, UPDATES_CHANNEL_NAME])
+COMMAND_CHANNELS = set([DEFAULT_CHANNEL_NAME, COMMANDS_CHANNEL_NAME])
 
 class LeaderboardHelpCommand(commands.HelpCommand):
     async def send_bot_help(self, mapping):
-        if self.context.channel.name != 'piu-leaderboard':
+        if self.context.channel.name not in COMMAND_CHANNELS:
             return
 
         # Create a list to hold the pages
