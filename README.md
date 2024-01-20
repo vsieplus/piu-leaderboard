@@ -13,8 +13,6 @@ If you are an admin of a discord server and would like to add this bot to your s
 
 Once the bot is in your server, you should create a new text channel titled `piu-leaderboard`. This is where the bot will post leaderboard updates and where users can interact with the bot. Alternatively, you can opt to create two separate channels: one for leaderboard updates (`piu-leaderboard-updates`), and one for user interaction (`piu-leaderboard-commands`).
 
-```python
-
 ## Commands
 
 ### Leaderboard Queries
