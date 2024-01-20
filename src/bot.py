@@ -105,7 +105,7 @@ async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
                 await ctx.send(QUERY_ERR_MSG)
             elif len(scores) == 0:
                 if len(player_ids) > 1:
-                    await ctx.send(f'No scores for `{', '.join(player_ids)}` on the leaderboard {chart_id}.')
+                    await ctx.send(f'No scores for `{", ".join(player_ids)}` on the leaderboard {chart_id}.')
                 else:
                     await ctx.send(f'`{player_ids[0]}` is not on the leaderboard for {chart_id}')
             else:
