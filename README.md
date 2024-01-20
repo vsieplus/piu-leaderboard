@@ -64,7 +64,7 @@ The following parameters are used in some of the commands above. All parameters 
 
 ![example3a](assets/ex_tracking.png)
 
-#### Later on, when they achieve a new/high score on a chart leaderboard:
+#### Later on, the bot will automatically send leaderboard updates for the tracked player(s)...
 
 ![example3b](assets/ex_track.png)
 
