@@ -9,9 +9,11 @@
 
 ## Setup
 
-If you are an admin of a discord server and would like to add this bot to your server, you can do so by clicking this [link](https://discord.com/api/oauth2/authorize?client_id=1190188505947701248&permissions=265216&scope=bot).
+If you are an admin of a discord server and would like to add this bot to your server, you can do so by clicking this [link](https://discord.com/api/oauth2/authorize?client_id=1190188505947701248&permissions=265216&scope=bot). You'll need to have the `Manage Server` permission to do this.
 
-Once the bot is in your server, you should create a new text channel titled `piu-leaderboard`. This is where the bot will post leaderboard updates and where users can interact with the bot. If you encounter any problems with the bot, please open an issue in this repo.
+Once the bot is in your server, you should create a new text channel titled `piu-leaderboard`. This is where the bot will post leaderboard updates and where users can interact with the bot. Alternatively, you can opt to create two separate channels: one for leaderboard updates (`piu-leaderboard-updates`), and one for user interaction (`piu-leaderboard-commands`).
+
+```python
 
 ## Commands
 
