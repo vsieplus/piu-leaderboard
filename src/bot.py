@@ -91,19 +91,23 @@ async def tracking(ctx: commands.Context):
         await ctx.send(f'Currently tracking the following players: ```{player_names}```')
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
-async def queryp(ctx: commands.Context, player_id: str, chart_id: str):
+async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
     if ctx.channel.name != CHANNEL_NAME:
         return
 
     async with ctx.typing():
         if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
             chart_id = new_chart_id
-            scores = await leaderboard.query_score(player_id, chart_id)
+            player_ids = player_ids.split(',')
+            scores = await leaderboard.query_score(player_ids, chart_id)
 
             if scores is None:
                 await ctx.send(QUERY_ERR_MSG)
             elif len(scores) == 0:
-                await ctx.send(f'`{player_id}` is not on the leaderboard for {chart_id}')
+                if len(player_ids) > 1:
+                    await ctx.send(f'No scores for `{', '.join(player_ids)}` on the leaderboard {chart_id}.')
+                else:
+                    await ctx.send(f'`{player_ids[0]}` is not on the leaderboard for {chart_id}')
             else:
                 for score in scores:
                     await ctx.send(embed=await score.embed(prev_score=None, compare=False))

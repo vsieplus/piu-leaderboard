@@ -131,19 +131,26 @@ class Leaderboard:
         """
         return process.extractBests(chart_id, self.charts.keys(), score_cutoff=60, limit=10)
 
-    async def query_score(self, player_id: str, chart_id: str) -> List[Score]:
+    async def query_score(self, player_ids: List[str], chart_id: str) -> List[Score]:
         """ Query a player's score on a level.
-        @param player_id: the player's ID, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
+        @param player_ids: the player IDs, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
         @param chart_id: the level's ID
         @return: list(Score) of all matching players' scores on the given level
         """
         chart_id = chart_id.lower()
 
         if chart_id in self.scores:
-            if '#' in player_id:
-                return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key]
-            else:
-                return [value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]]
+            scores = []
+            for player_id in player_ids:
+                if '#' in player_id:
+                    scores.extend([value for key, value in self.scores[chart_id].items() if player_id.upper() == key])
+                else:
+                    scores.extend([value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]])
+
+            # sort scores by rank
+            scores.sort(key=lambda score: score.rank)
+
+            return scores
 
         return None
 
