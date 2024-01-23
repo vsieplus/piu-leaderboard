@@ -41,6 +41,6 @@ class LeaderboardHelpCommand(commands.HelpCommand):
         pages.append('\nParameters (case-insensitive): ')
         pages.append('\t<chart_id>   "Song title (S/D/Co-op)(Level)"  | must be enclosed in quotes; for Co-op chart levels, use x2, x3, etc...\n'
                      '\t<player_id>  name[#tag][,name2[#tag2],...]    | if #tag is not specified, all scores with a matching name will be returned\n'
-                     '\t<rank>       rank[-rank]                      | ranks must be between 1 and 100; can optionally specify a range of ranks to query\n')
+                     '\t<rank>       rank[-rank][,rank2a[-rank2b]...] | ranks must be between 1 and 100; can optionally specify a range of ranks to query\n')
 
         await self.get_destination().send('```' + '\n'.join(pages) + '```')

@@ -123,24 +123,27 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
     async with ctx.typing():
         if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
             chart_id = new_chart_id
-            rank_range = await get_rank_range(ctx, rank)
-            if rank_range and len(rank_range) >= 2:
-                scores = []
-                i = rank_range[0]
-                while i <= rank_range[1]:
-                    curr_scores = await leaderboard.query_rank(i, chart_id)
-                    if curr_scores is None:
-                        await ctx.send(QUERY_ERR_MSG)
-                        return
-                    else:
-                        scores.extend(curr_scores)
+            scores = []
+            ranks = rank.split(',')
 
-                        # skip to the next non-tied rank
-                        if len(curr_scores) > 1:
-                            i = curr_scores[0].rank + len(curr_scores)
-                            continue
+            for rank in ranks:
+                rank_range = await get_rank_range(ctx, rank)
+                if rank_range and len(rank_range) >= 2:
+                    i = rank_range[0]
+                    while i <= rank_range[1]:
+                        curr_scores = await leaderboard.query_rank(i, chart_id)
+                        if curr_scores is None:
+                            await ctx.send(QUERY_ERR_MSG)
+                            return
+                        else:
+                            scores.extend(curr_scores)
 
-                    i += 1
+                            # skip to the next non-tied rank
+                            if len(curr_scores) > 1:
+                                i = curr_scores[0].rank + len(curr_scores)
+                                continue
+
+                        i += 1
 
                 if len(scores) == 0:
                     await ctx.send(f'No scores with rank(s) {rank} on {chart_id}.')
