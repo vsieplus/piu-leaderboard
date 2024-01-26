@@ -16,7 +16,7 @@ class GuildLeaderboard:
         if os.path.isfile(self.players_file):
             with open(self.players_file, 'r') as f:
                 for line in f:
-                    self.players.add(line.strip())
+                    self.players.add(line.strip().upper())
 
     async def add_player(self, player_id: str) -> bool:
         """ Add a player to the guild's leaderboard. If the player is already being tracked, do nothing.
@@ -24,6 +24,7 @@ class GuildLeaderboard:
         @param player_id: the player's ID, in the format of name#tag
         @return: True if the player was added, False otherwise
         """
+        player_id = player_id.upper()
         added = player_id not in self.players
         if added:
             self.players.add(player_id)
@@ -36,6 +37,7 @@ class GuildLeaderboard:
         @param player_id: the player's ID, in the format of name#tag
         @return: True if the player was removed, False otherwise
         """
+        player_id = player_id.upper()
         removed = player_id in self.players
         if removed:
             self.players.remove(player_id)
