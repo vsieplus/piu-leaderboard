@@ -176,7 +176,7 @@ async def get_rank_range(ctx: commands.Context, rank: str) -> List[int]:
 
     return rank_range
 
-@tasks.loop(minutes=60)
+@tasks.loop(minutes=20)
 async def update_leaderboard():
     logger.info('Updating leaderboards')
     await leaderboard.update_all()
