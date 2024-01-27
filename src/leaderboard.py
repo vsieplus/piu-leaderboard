@@ -21,6 +21,12 @@ setup()
 
 SAVE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 
+MODES = [
+    'Single',
+    'Double',
+    'Co-op',
+]
+
 class Leaderboard:
     LEADERBOARD_SAVE_FILE = os.path.join(SAVE_DIR, 'leaderboard.json')
     SONGLIST_SAVE_FILE = os.path.join(SAVE_DIR, 'songlist.csv')
@@ -35,6 +41,9 @@ class Leaderboard:
                 for row in reader:
                     chart = Chart(title=row['title'], mode=row['mode'], level=row['level'], leaderboard_id=row['id'], thumbnail_url=row['thumbnail'])
                     self.charts[chart.chart_id.lower()] = chart
+
+        # split chart ids into 3 batches to reduce the number of requests per batch
+        self.curr_mode_idx = 0
 
         # scores is dict of { chart_id : dict of { player_id : Score } }
         if os.path.isfile(self.LEADERBOARD_SAVE_FILE):
@@ -72,7 +81,10 @@ class Leaderboard:
         """ Update all chart leaderboards.
         @return: None
         """
-        urls = { chart.get_leaderboard_url() : chart for chart in self.charts.values() }
+        curr_mode = MODES[self.curr_mode_idx]
+        self.curr_mode_idx = (self.curr_mode_idx + 1) % len(MODES)
+
+        urls = { chart.get_leaderboard_url() : chart for chart in self.charts.values() if chart.mode == curr_mode }
 
         await self.crawl_in_thread(urls)
         await self.save()
