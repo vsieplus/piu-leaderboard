@@ -22,6 +22,7 @@ INVALID_RANK_RANGE_MSG = 'Invalid rank parameter. Please ensure you are using th
 INT_ERR_MSG  = '. One or more of the arguments could not be parsed as an integer'
 LVL_NOT_FOUND_MSG = '`"{}"` was not found. Please ensure you are using the format `"Song title (S/D/Co-op)(Level)"`'
 QUERY_ERR_MSG = 'An error occurred while querying the leaderboard. Please try again later'
+DEFAULT_MODES = 'single,double,co-op'
 
 leaderboards = LeaderboardDict(GuildLeaderboard)
 leaderboard = Leaderboard()
@@ -58,19 +59,29 @@ async def on_command_error(ctx: commands.Context, error: commands.errors.Command
         await ctx.send('You do not have the correct role for this command.')
 
 @bot.command(name='track', help='Begin tracking a player\'s scores')
-async def track(ctx: commands.Context, player_id: str):
+async def track(ctx: commands.Context, player_id: str, modes: str = None):
     if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
-    if await leaderboards[ctx.guild.id].add_player(player_id):
-        await ctx.send(f'Now tracking player `{player_id}`')
+    if modes is None:
+        modes = DEFAULT_MODES
+
+    modes = modes.lower().split(',')
+
+    if await leaderboards[ctx.guild.id].add_player(player_id, modes):
+        await ctx.send(f'Now tracking player `{player_id}` for the following modes: `{modes}`')
     else:
-        await ctx.send(f'Player `{player_id}` is already being tracked')
+        await ctx.send(f'Player `{player_id}` is already being tracked for the following modes: `{modes}`')
 
 @bot.command(name='untrack', help='Stop tracking a player\'s scores')
-async def untrack(ctx: commands.Context, player_id: str):
+async def untrack(ctx: commands.Context, player_id: str, modes: str = None):
     if ctx.channel.name not in COMMAND_CHANNELS:
         return
+
+    if modes is None:
+        modes = DEFAULT_MODES
+
+    modes = modes.lower().split(',')
 
     if await leaderboards[ctx.guild.id].remove_player(player_id):
         await ctx.send(f'No longer tracking player `{player_id}`')

@@ -1,6 +1,8 @@
 # guild_leaderboard.py
 
 import os
+from typing import List
+
 import discord
 from leaderboard import Leaderboard, SAVE_DIR
 
@@ -18,10 +20,11 @@ class GuildLeaderboard:
                 for line in f:
                     self.players.add(line.strip().upper())
 
-    async def add_player(self, player_id: str) -> bool:
+    async def add_player(self, player_id: str, modes: List[str]) -> bool:
         """ Add a player to the guild's leaderboard. If the player is already being tracked, do nothing.
         Players that are being tracked will have their leaderboard updates automatically sent to the guild's 'piu-leaderboard' channel.
         @param player_id: the player's ID, in the format of name#tag
+        @param modes: the modes to track the player for
         @return: True if the player was added, False otherwise
         """
         player_id = player_id.upper()
@@ -32,7 +35,7 @@ class GuildLeaderboard:
         await self.save()
         return added
 
-    async def remove_player(self, player_id: str) -> bool:
+    async def remove_player(self, player_id: str, modes: List[str]) -> bool:
         """ Remove a player from the guild's leaderboard. If the player is not being tracked, do nothing.
         @param player_id: the player's ID, in the format of name#tag
         @return: True if the player was removed, False otherwise
