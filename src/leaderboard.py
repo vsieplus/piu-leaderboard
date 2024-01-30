@@ -205,6 +205,7 @@ class Leaderboard:
                 for player in players:
                     if new_score.player == player or ('#' not in player and new_score.player.split('#')[0] == player):
                         updates.append((new_score, prev_score))
+                        break
 
         return updates
 
