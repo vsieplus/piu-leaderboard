@@ -42,9 +42,9 @@ The following parameters are used in some of the commands above. All parameters 
 
 | Parameter | Description |
 | --- | :--- |
-| `player_id` | The player's ID on the leaderboard in the format of `name[#tag]`, where `#tag` is the 4-digit discriminator. If `#tag` is not specified, the bot will search for all players with the name. To query multiple players at once, use a comma to separate the names ( e.g. `player1,player2` ) |
+| `player_id` | The player's ID on the leaderboard in the format of `name[#tag]`, where `#tag` is the 4-digit discriminator. For `!queryp` commands, if `#tag` is not specified, the bot will search for all players with the name. To query multiple players at once, use a comma to separate the names ( e.g. `player1,player2` ). When using the `!track` command, the `#tag` should be specified |
 | `chart_id` | The ID of the chart to query in the format of `"Song title (S/D/Co-op)(Level)"`. This parameter must be enclosed in quotes. For Co-op chart levels, use x2, x3, etc... If an exact match cannot be found, the bot will provide a list of close matches you can choose from. |
-| `rank` | The rank or range of ranks to query. To query a range, use the format `rank1-rank2`, where `rank1 < rank2`. Ranks must be between 1 and 100.  |
+| `rank` | The rank or range of ranks to query. To query a range, use the format `rank1-rank2`, where `rank1 < rank2`. Rank(s) must be between 1 and 100.  |
 
 ## Examples
 
