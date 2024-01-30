@@ -201,8 +201,10 @@ class Leaderboard:
         """
         updates = []
         for (new_score, prev_score) in self.score_updates:
-            if new_score is not None and new_score.player in players:
-                updates.append((new_score, prev_score))
+            if new_score is not None:
+                for player in players:
+                    if new_score.player == player or ('#' not in player and new_score.player.split('#')[0] == player):
+                        updates.append((new_score, prev_score))
 
         return updates
 
