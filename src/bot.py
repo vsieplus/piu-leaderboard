@@ -88,7 +88,6 @@ async def tracking(ctx: commands.Context):
         player_names = '\n'.join(leaderboards[ctx.guild.id].players)
         player_names = discord.utils.escape_markdown(player_names)
         player_names = player_names.replace('\\#', '＃')
-        print(repr(player_names))
         await ctx.send(f'Currently tracking the following players: ```\n{player_names}```')
 
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
