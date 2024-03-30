@@ -34,13 +34,18 @@ class GuildLeaderboard:
 
     async def remove_player(self, player_id: str) -> bool:
         """ Remove a player from the guild's leaderboard. If the player is not being tracked, do nothing.
-        @param player_id: the player's ID, in the format of name#tag
+        If #tag is not provided, all players with the same name will be removed.
+        @param player_id: the player's ID, in the format of name[#tag]
         @return: True if the player was removed, False otherwise
         """
         player_id = player_id.upper()
-        removed = player_id in self.players
-        if removed:
-            self.players.remove(player_id)
+
+        removed = False
+
+        for player in self.players.copy():
+            if player.startswith(player_id):
+                self.players.remove(player)
+                removed = True
 
         await self.save()
         return removed
