@@ -90,9 +90,29 @@ async def tracking(ctx: commands.Context):
         player_names = player_names.replace('\\#', '＃')
         await ctx.send(f'Currently tracking the following players: ```\n{player_names}```')
 
+@bot.command(name='querypu', help='Query a player\'s Pumbility + Ranking')
+async def querypu(ctx: commands.Context, player_ids: str):
+    if ctx.channel.name not in COMMAND_CHANNELS:
+        return
+
+    async with ctx.typing():
+        player_ids = player_ids.split(',')
+        pumbilities = await leaderboard.query_pumbility(player_ids)
+
+        if pumbilities is None:
+            await ctx.send(QUERY_ERR_MSG)
+        elif len(pumbilities) == 0:
+            if len(player_ids) > 1:
+                await ctx.send(f'No Pumbility rank found for `{", ".join(player_ids)}` on the leaderboard.')
+            else:
+                await ctx.send(f'`{player_ids[0]}` is not on the Pumbility leaderboard.')
+        else:
+            for pumbility in pumbilities:
+                await ctx.send(embed=await pumbility.embed(prev_pumbility=None, compare=False))
+
 @bot.command(name='queryp', help='Query a player\'s rank on a level')
 async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
-    if ctx.channel.name  not in COMMAND_CHANNELS:
+    if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     async with ctx.typing():
@@ -113,7 +133,6 @@ async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
                     await ctx.send(embed=await score.embed(prev_score=None, compare=False))
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
-
 
 @bot.command(name='queryr', help='Query a specific rank on a level')
 async def queryr(ctx: commands.Context, rank: str, chart_id: str):
