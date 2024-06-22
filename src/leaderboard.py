@@ -13,8 +13,9 @@ from discord.ext import commands
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 
-from score import Score
 from chart import Chart
+from pumbility import Pumbility
+from score import Score
 from leaderboard_crawler import LeaderboardCrawler
 
 setup()
@@ -58,6 +59,7 @@ class Leaderboard:
         else :
             self.scores = dict()
 
+        self.pumbility_ranking = []
         self.score_updates = []
 
     async def update(self, chart_id: str) -> bool:
@@ -142,6 +144,18 @@ class Leaderboard:
         @return: the best matching chart IDs
         """
         return process.extractBests(chart_id, self.charts.keys(), score_cutoff=60, limit=10)
+
+    async def query_pumbility(self, player_ids: List[str]) -> List[Pumbility]:
+        """ Query a player's Pumbility ranking.
+        @param player_ids: the player IDs, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
+        @return: list(Pumbility) of all matching players' Pumbility rankings
+        """
+        pumbilities = []
+
+        for player_id in player_ids:
+            pass
+
+        return pumbilities
 
     async def query_score(self, player_ids: List[str], chart_id: str) -> List[Score]:
         """ Query a player's score on a level.
