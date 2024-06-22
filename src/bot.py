@@ -90,7 +90,7 @@ async def tracking(ctx: commands.Context):
         player_names = player_names.replace('\\#', '＃')
         await ctx.send(f'Currently tracking the following players: ```\n{player_names}```')
 
-@bot.command(name='querypu', help='Query a player\'s Pumbility + Ranking')
+@bot.command(name='querypu', help='Query a player\'s Pumbility Ranking')
 async def querypu(ctx: commands.Context, player_ids: str):
     if ctx.channel.name not in COMMAND_CHANNELS:
         return
