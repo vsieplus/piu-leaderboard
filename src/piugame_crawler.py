@@ -77,7 +77,7 @@ class PIUGAME_CRAWLER:
         @return: the player's avatar ID
         """
         profile_img = ranking.xpath('.//div[@class="profile_img"]//div[@class="resize"]//div[@class="re bgfix"]/@style').get()
-        avatar_id =  re.search(r'(?<=background-image:url\(\'https://(phoenix\.)?piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)', profile_img).group()
+        avatar_id =  re.search(r'(?<=background-image:url\(\'https://phoenix\.piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)', profile_img).group()
 
         return avatar_id
 
