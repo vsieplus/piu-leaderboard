@@ -13,7 +13,7 @@ RANKING_SUFFIXES = {
     0 : 'th',
 }
 
-def get_rank_suffix(cls, rank) -> str:
+def get_rank_suffix(rank) -> str:
     if rank >= 11 and rank <= 13:
         return 'th'
 
