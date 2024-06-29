@@ -48,7 +48,7 @@ async def on_ready():
         leaderboards[guild.id] = GuildLeaderboard(guild.id)
         logger.info(f'{guild.name}(id: {guild.id})')
 
-    update_leaderboard.start()
+    #update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
@@ -116,7 +116,7 @@ async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
         return
 
     async with ctx.typing():
-        if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
+        if (new_chart_id := await leaderboard.rescrape_chart(bot, ctx, chart_id)):
             chart_id = new_chart_id
             player_ids = player_ids.split(',')
             scores = await leaderboard.query_score(player_ids, chart_id)
@@ -140,7 +140,7 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
         return
 
     async with ctx.typing():
-        if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
+        if (new_chart_id := await leaderboard.rescrape_chart(bot, ctx, chart_id)):
             chart_id = new_chart_id
             rank_range = await get_rank_range(ctx, rank)
             if rank_range and len(rank_range) >= 2:
@@ -198,7 +198,7 @@ async def get_rank_range(ctx: commands.Context, rank: str) -> List[int]:
 @tasks.loop(minutes=20)
 async def update_leaderboard():
     logger.info('Updating leaderboards')
-    await leaderboard.update_all()
+    await leaderboard.update_all_charts()
     logger.info('Leaderboards updated')
 
     for guild in bot.guilds:
