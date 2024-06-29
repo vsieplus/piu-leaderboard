@@ -77,8 +77,9 @@ class PIUGAME_CRAWLER:
         @return: the player's avatar ID
         """
         profile_img = ranking.xpath('.//div[@class="profile_img"]//div[@class="resize"]//div[@class="re bgfix"]/@style').get()
-        avatar_id =  re.search(r'(?<=background-image:url\(\'https://phoenix\.piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)', profile_img).group()
+        result =  re.search(r'(?<=background-image:url\(\'https://piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)', profile_img)
 
+        avatar_id = result.group() if result is not None else ''
         return avatar_id
 
     def parse_date(ranking) -> str:
