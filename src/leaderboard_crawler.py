@@ -8,6 +8,7 @@ from chart import Chart
 from score import Score
 
 from piugame_crawler import PIUGAME_CRAWLER
+from util import update_curr_tie_count, update_next_tie_count
 
 class LeaderboardCrawler(scrapy.Spider):
     name = 'leaderboard_spider'
@@ -49,31 +50,9 @@ class LeaderboardCrawler(scrapy.Spider):
             avatar_id = PIUGAME_CRAWLER.parse_avatar_id(ranking_info)
             date = PIUGAME_CRAWLER.parse_date(ranking)
 
-            if rank == previous_rank:
-                if tie_count == 1:
-                    # make sure to count first tie
-                    curr_tied_players.append(previous_player_id)
-
-                curr_tied_players.append(player_id)
-                tie_count += 1
-
+            tie_count = update_curr_tie_count(tie_count, rank, previous_rank, player_id, previous_player_id, curr_tied_players)
             scores_dict[player_id] = Score(chart=chart, player=player_id, score=score, rank=rank, tie_count=tie_count, avatar_id=avatar_id, date=date)
-
-            is_last = i == len(ranking_list) - 1
-            is_new_rank = rank != previous_rank and tie_count > 1
-
-            if is_last or is_new_rank:
-                # set the tie count for all tied players
-                for tied_player_id in curr_tied_players:
-                    scores_dict[tied_player_id].tie_count = tie_count
-
-                # reset tie count for next rank
-                if is_new_rank:
-                    scores_dict[player_id].tie_count = 1
-
-                # reset tie count
-                tie_count = 1
-                curr_tied_players = []
+            tie_count = update_next_tie_count(tie_count, rank, previous_rank, i, player_id, scores_dict, ranking_list, curr_tied_players)
 
             previous_rank = rank
             previous_player_id = player_id
