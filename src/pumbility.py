@@ -3,10 +3,11 @@
 import discord
 
 from emojis import AVATAR_EMOJIS, RANKING_EMOJIS
+from util import get_rank_suffix
 
 class Pumbility():
-    def __init__(self, player: str, pumbility: int, rank: int, tie_count: int, title: str, avatar_id: str, date: str):
-        self.player = player
+    def __init__(self, player_id: str, pumbility: int, rank: int, tie_count: int, title: str, avatar_id: str, date: str):
+        self.player_id = player_id
         self.pumbility = pumbility
         self.rank = rank
         self.tie_count = tie_count
@@ -15,11 +16,11 @@ class Pumbility():
         self.date = date
 
     async def embed(self, prev_pumbility: 'Pumbility', compare: bool) -> discord.Embed:
-        embed_color = discord.Color.gold()
+        embed_color = discord.Color.blue()
         avatar_emoji = f'{AVATAR_EMOJIS[self.avatar_id]} ' if self.avatar_id in AVATAR_EMOJIS else ''
 
         embed = discord.Embed(
-            title=f'{avatar_emoji}{self.player}',
+            title=f'{avatar_emoji}{self.player_id}',
             description=await self.embed_description(prev_pumbility, compare),
             color=embed_color,
         )
