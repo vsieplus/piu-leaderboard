@@ -40,7 +40,7 @@ class PIUGAME_CRAWLER:
         @param ranking_info: the ranking info div
         @return: the player's title
         """
-        return ranking_info.xpath('.//div[@class="profile_title en col6"]/text()').get()
+        return ranking_info.xpath('.//div[contains(@class, "profile_title en col")]/text()').get()
 
     @staticmethod
     def parse_player_id(ranking_info, pumbility: bool) -> str:
