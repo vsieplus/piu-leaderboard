@@ -31,6 +31,7 @@ MODES = [
 
 class Leaderboard:
     LEADERBOARD_SAVE_FILE = os.path.join(SAVE_DIR, 'leaderboard.json')
+    PUMBILITY_SAVE_FILE = os.path.json(SAVE_DIR, 'pumbility.json')
     SONGLIST_SAVE_FILE = os.path.join(SAVE_DIR, 'songlist.csv')
 
     def __init__(self):
@@ -60,8 +61,17 @@ class Leaderboard:
         else :
             self.scores = dict()
 
-        self.pumbility_ranking = dict()
+        if os.path.isfile(self.PUMBILITY_SAVE_FILE):
+            with open(self.PUMBILITY_SAVE_FILE, 'r', encoding='utf-8') as f:
+                self.pumbility_ranking = {
+                    player_id: Pumbility.from_dict(pumbility)
+                    for player_id, pumbility in json.load(f).items()
+                }
+        else:
+            self.pumbility_ranking = dict()
+
         self.score_updates = []
+        self.pumbility_updates = []
 
     async def update_chart(self, chart_id: str) -> bool:
         """ Update the leaderboard for a given chart.
@@ -76,7 +86,7 @@ class Leaderboard:
             return False
 
         await self.crawl_charts_in_thread(urls)
-        await self.save()
+        await self.save_chart_leaderboards()
 
         return True
 
@@ -90,7 +100,7 @@ class Leaderboard:
         urls = { chart.get_leaderboard_url() : chart for chart in self.charts.values() if chart.mode == curr_mode }
 
         await self.crawl_charts_in_thread(urls)
-        await self.save()
+        await self.save_chart_leaderboards()
 
     async def crawl_charts_in_thread(self, urls: dict[str, Chart]):
         """ Run the leaderboard crawler in a thread.
@@ -151,8 +161,10 @@ class Leaderboard:
         """ Update the Pumbility ranking.
         @return: None
         """
+        self.pumbility_updates.clear()
+
         runner = CrawlerRunner(get_project_settings())
-        runner.crawl(PumbilityCrawler, pumbility_ranking=self.pumbility_ranking)
+        runner.crawl(PumbilityCrawler, pumbility_ranking=self.pumbility_ranking, pumbility_updates=self.pumbility_updates)
         runner.join()
 
     async def query_pumbility(self, player_ids: List[str]) -> List[Pumbility]:
@@ -161,6 +173,7 @@ class Leaderboard:
         @return: list(Pumbility) of all matching players' Pumbility rankings
         """
         self.run_crawl_pumbility_ranking()
+        await self.save_pumbility_leaderboard()
 
         pumbilities = []
 
@@ -222,22 +235,37 @@ class Leaderboard:
 
         return None
 
-    async def get_score_updates(self, players: Set[str]) -> List[tuple[Score, Score]]:
+    async def get_score_updates(self, player_ids: Set[str]) -> List[tuple[Score, Score]]:
         """ Get the leaderboard updates for all the players being tracked.
-        @param players: the players to get updates for
+        @param player_ids: the players to get updates for
         @return: list of (new_score, prev_score) tuples
         """
         updates = []
         for (new_score, prev_score) in self.score_updates:
             if new_score is not None:
-                for player in players:
-                    if new_score.player == player or ('#' not in player and new_score.player.split('#')[0] == player):
+                for player_id in player_ids:
+                    if new_score.player == player_id or ('#' not in player_id and new_score.player.split('#')[0] == player_id):
                         updates.append((new_score, prev_score))
                         break
 
         return updates
 
-    async def save(self):
+    async def get_pumbility_updates(self, player_ids: Set[str]) -> List[tuple[Pumbility, Pumbility]]:
+        """ Get the leaderboard updates for all the players being tracked.
+        @param player_ids: the players to get updates for
+        @return: list of (new_pumbility, prev_pumbility) tuples
+        """
+        updates = []
+        for (new_pumbility, prev_pumbility) in self.pumbility_updates:
+            if new_pumbility is not None:
+                for player_id in player_ids:
+                    if new_pumbility.player_id == player_id or ('#' not in player_id and new_pumbility.player_id.split('#')[0] == player_id):
+                        updates.append((new_pumbility, prev_pumbility))
+                        break
+
+        return updates
+
+    async def save_chart_leaderboards(self):
         """Save the leaderboard to a file in JSON format.
         @return: None
         """
@@ -246,6 +274,18 @@ class Leaderboard:
                 json.dumps(
                     { chart_id: { player_id: score.to_dict() for player_id, score in chart_scores.items() }
                         for chart_id, chart_scores in self.scores.items() },
+                    indent=2
+                )
+            )
+
+    async def save_pumbility_leaderboard(self):
+        """Save the Pumbility leaderboard to a file in JSON format.
+        @return: None
+        """
+        with open(self.PUMBILITY_SAVE_FILE, 'w', encoding='utf-8') as f:
+            f.write(
+                json.dumps(
+                    { player_id: pumbility.to_dict() for player_id, pumbility in self.pumbility_ranking.items() },
                     indent=2
                 )
             )
