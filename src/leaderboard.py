@@ -13,9 +13,11 @@ from discord.ext import commands
 from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 
-from score import Score
 from chart import Chart
+from score import Score
 from leaderboard_crawler import LeaderboardCrawler
+from pumbility import Pumbility
+from pumbility_crawler import PumbilityCrawler
 
 setup()
 
@@ -58,9 +60,10 @@ class Leaderboard:
         else :
             self.scores = dict()
 
+        self.pumbility_ranking = dict()
         self.score_updates = []
 
-    async def update(self, chart_id: str) -> bool:
+    async def update_chart(self, chart_id: str) -> bool:
         """ Update the leaderboard for a given chart.
         @param chart_id: the chart's ID, lowercase
         @return: None
@@ -72,12 +75,12 @@ class Leaderboard:
         else:
             return False
 
-        await self.crawl_in_thread(urls)
+        await self.crawl_charts_in_thread(urls)
         await self.save()
 
         return True
 
-    async def update_all(self):
+    async def update_all_charts(self):
         """ Update all chart leaderboards.
         @return: None
         """
@@ -86,21 +89,21 @@ class Leaderboard:
 
         urls = { chart.get_leaderboard_url() : chart for chart in self.charts.values() if chart.mode == curr_mode }
 
-        await self.crawl_in_thread(urls)
+        await self.crawl_charts_in_thread(urls)
         await self.save()
 
-    async def crawl_in_thread(self, urls: dict[str, Chart]):
+    async def crawl_charts_in_thread(self, urls: dict[str, Chart]):
         """ Run the leaderboard crawler in a thread.
         @param urls: dict of { url : Chart }
         @return: None
         """
         loop = asyncio.get_event_loop()
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = loop.run_in_executor(executor, self.run_crawl, urls)
+            future = loop.run_in_executor(executor, self.run_crawl_charts, urls)
             await future
 
     @wait_for(timeout=600.0)
-    def run_crawl(self, urls):
+    def run_crawl_charts(self, urls):
         self.score_updates.clear()
 
         runner = CrawlerRunner(get_project_settings())
@@ -108,17 +111,17 @@ class Leaderboard:
         d = runner.join()  # returns a Deferred that fires when all crawling jobs have finished
         return d
 
-    async def rescrape(self, bot: commands.Bot, ctx: commands.Context, chart_id: str) -> str:
+    async def rescrape_chart(self, bot: commands.Bot, ctx: commands.Context, chart_id: str) -> str:
         """ Rescrape the leaderboard for a given chart.
         @param chart_id: the chart's ID
         @return: the chart's ID if a viable match was found, None otherwise
         """
         chart_id = chart_id.lower()
         if chart_id in self.charts:
-            if await self.update(chart_id):
+            if await self.update_chart(chart_id):
                 return chart_id
         else:
-            best_matches = await self.get_best_matches(chart_id)
+            best_matches = await self.get_best_chart_matches(chart_id)
             if len(best_matches) > 0:
                 best_matches_str = "\n".join([f"{i + 1}. {match[0].title()}" for i, match in enumerate(best_matches)])
                 await ctx.send(f'Chart `{chart_id}` not found. Did you mean one of the following?\n'
@@ -129,19 +132,46 @@ class Leaderboard:
                 if message.content.isnumeric() and int(message.content) - 1 < len(best_matches):
                     chart_id = best_matches[int(message.content) - 1][0]
                     async with ctx.typing():
-                        if await self.update(chart_id):
+                        if await self.update_chart(chart_id):
                             return chart_id
             except asyncio.TimeoutError:
                 await ctx.send('Sorry, you took too long to respond.')
 
         return None
 
-    async def get_best_matches(self, chart_id: str) -> List[tuple[str, int]]:
+    async def get_best_chart_matches(self, chart_id: str) -> List[tuple[str, int]]:
         """ Get the best matching chart ID for a given chart.
         @param chart_id: the chart's ID
         @return: the best matching chart IDs
         """
         return process.extractBests(chart_id, self.charts.keys(), score_cutoff=60, limit=10)
+
+    @wait_for(timeout=600.0)
+    def run_crawl_pumbility_ranking(self):
+        """ Update the Pumbility ranking.
+        @return: None
+        """
+        runner = CrawlerRunner(get_project_settings())
+        runner.crawl(PumbilityCrawler, pumbility_ranking=self.pumbility_ranking)
+        runner.join()
+
+    async def query_pumbility(self, player_ids: List[str]) -> List[Pumbility]:
+        """ Query a player's Pumbility ranking.
+        @param player_ids: the player IDs, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
+        @return: list(Pumbility) of all matching players' Pumbility rankings
+        """
+        self.run_crawl_pumbility_ranking()
+
+        pumbilities = []
+
+        for player_id in player_ids:
+            pumbilities.extend([value for key, value in self.pumbility_ranking.items() if
+                                player_id.upper() == (key if '#' in player_id else key.split('#')[0])])
+
+        # sort pumbilities by rank
+        pumbilities.sort(key=lambda pumbility: pumbility.rank)
+
+        return pumbilities
 
     async def query_score(self, player_ids: List[str], chart_id: str) -> List[Score]:
         """ Query a player's score on a level.
@@ -154,10 +184,8 @@ class Leaderboard:
         if chart_id in self.scores:
             scores = []
             for player_id in player_ids:
-                if '#' in player_id:
-                    scores.extend([value for key, value in self.scores[chart_id].items() if player_id.upper() == key])
-                else:
-                    scores.extend([value for key, value in self.scores[chart_id].items() if player_id.upper() == key.split('#')[0]])
+                scores.extend([value for key, value in self.scores[chart_id].items() if
+                               player_id.upper() == (key if '#' in player_id else key.split('#')[0])])
 
             # sort scores by rank
             scores.sort(key=lambda score: score.rank)

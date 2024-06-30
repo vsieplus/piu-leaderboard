@@ -4,19 +4,7 @@ import discord
 
 from chart import Chart
 from emojis import AVATAR_EMOJIS, GRADE_EMOJIS, RANKING_EMOJIS
-
-RANKING_SUFFIXES = {
-    1 : 'st',
-    2 : 'nd',
-    3 : 'rd',
-    4 : 'th',
-    5 : 'th',
-    6 : 'th',
-    7 : 'th',
-    8 : 'th',
-    9 : 'th',
-    0 : 'th',
-}
+from util import get_rank_suffix
 
 MODE_COLORS = {
     'Single': discord.Color.red(),
@@ -62,7 +50,7 @@ class Score():
         rank_emoji = f'{RANKING_EMOJIS[self.rank]} ' if self.rank in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
         grade_emoji = f'{GRADE_EMOJIS[self.grade]} ' if self.grade in GRADE_EMOJIS else ''
 
-        rank_suffix = Score.get_rank_suffix(self.rank)
+        rank_suffix = get_rank_suffix(self.rank)
         tied_text = f' ({self.tie_count}-way tie)' if self.tie_count > 1 else ''
         formatted_score = format(self.score, ',')
 
@@ -71,7 +59,7 @@ class Score():
             return f'{rank_emoji}*{self.rank}{rank_suffix}*{new_rank_text}{tied_text}\n' \
                    f'{grade_emoji}*{formatted_score}*'
         else:
-            prev_rank_suffix = Score.get_rank_suffix(prev_score.rank)
+            prev_rank_suffix = get_rank_suffix(prev_score.rank)
             prev_formatted_score = format(prev_score.score, ',')
 
             return f'{rank_emoji}*{prev_score.rank}{prev_rank_suffix}* -> *{self.rank}{rank_suffix}*{tied_text}\n' \
@@ -99,13 +87,6 @@ class Score():
             data['avatar_id'],
             data['date'],
         )
-
-    @classmethod
-    def get_rank_suffix(cls, rank) -> str:
-        if rank >= 11 and rank <= 13:
-            return 'th'
-
-        return RANKING_SUFFIXES[rank % 10]
 
     @classmethod
     def calculate_grade(cls, score: int) -> str:

@@ -48,7 +48,7 @@ async def on_ready():
         leaderboards[guild.id] = GuildLeaderboard(guild.id)
         logger.info(f'{guild.name}(id: {guild.id})')
 
-    update_leaderboard.start()
+    #update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
@@ -90,13 +90,33 @@ async def tracking(ctx: commands.Context):
         player_names = player_names.replace('\\#', '＃')
         await ctx.send(f'Currently tracking the following players: ```\n{player_names}```')
 
-@bot.command(name='queryp', help='Query a player\'s rank on a level')
-async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
-    if ctx.channel.name  not in COMMAND_CHANNELS:
+@bot.command(name='querypu', help='Query a player\'s Pumbility Ranking')
+async def querypu(ctx: commands.Context, player_ids: str):
+    if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     async with ctx.typing():
-        if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
+        player_ids = player_ids.split(',')
+        pumbilities = await leaderboard.query_pumbility(player_ids)
+
+        if pumbilities is None:
+            await ctx.send(QUERY_ERR_MSG)
+        elif len(pumbilities) == 0:
+            if len(player_ids) > 1:
+                await ctx.send(f'No Pumbility rank found for `{", ".join(player_ids)}` on the leaderboard.')
+            else:
+                await ctx.send(f'`{player_ids[0]}` is not on the Pumbility leaderboard.')
+        else:
+            for pumbility in pumbilities:
+                await ctx.send(embed=await pumbility.embed(prev_pumbility=None, compare=False))
+
+@bot.command(name='queryp', help='Query a player\'s rank on a level')
+async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
+    if ctx.channel.name not in COMMAND_CHANNELS:
+        return
+
+    async with ctx.typing():
+        if (new_chart_id := await leaderboard.rescrape_chart(bot, ctx, chart_id)):
             chart_id = new_chart_id
             player_ids = player_ids.split(',')
             scores = await leaderboard.query_score(player_ids, chart_id)
@@ -114,14 +134,13 @@ async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
-
 @bot.command(name='queryr', help='Query a specific rank on a level')
 async def queryr(ctx: commands.Context, rank: str, chart_id: str):
     if ctx.channel.name not in COMMAND_CHANNELS:
         return
 
     async with ctx.typing():
-        if (new_chart_id := await leaderboard.rescrape(bot, ctx, chart_id)):
+        if (new_chart_id := await leaderboard.rescrape_chart(bot, ctx, chart_id)):
             chart_id = new_chart_id
             rank_range = await get_rank_range(ctx, rank)
             if rank_range and len(rank_range) >= 2:
@@ -179,7 +198,7 @@ async def get_rank_range(ctx: commands.Context, rank: str) -> List[int]:
 @tasks.loop(minutes=20)
 async def update_leaderboard():
     logger.info('Updating leaderboards')
-    await leaderboard.update_all()
+    await leaderboard.update_all_charts()
     logger.info('Leaderboards updated')
 
     for guild in bot.guilds:
