@@ -63,7 +63,7 @@ The following parameters are used in some of the commands above. All parameters 
 
 ### Query a player's pumbility ranking
 
-![example3](assets/ex_querypu.png)
+<img src="assets/ex_querypu.png", width="300">
 
 ### Player tracking
 
