@@ -49,6 +49,7 @@ async def on_ready():
         logger.info(f'{guild.name}(id: {guild.id})')
 
     update_leaderboard.start()
+    update_pumbility.start()
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
@@ -96,6 +97,8 @@ async def querypu(ctx: commands.Context, player_ids: str):
         return
 
     async with ctx.typing():
+        await leaderboard.update_pumbility()
+
         player_ids = player_ids.split(',')
         pumbilities = await leaderboard.query_pumbility(player_ids)
 
@@ -205,10 +208,21 @@ async def update_leaderboard():
         for channel in guild.text_channels:
             if channel.name in UPDATE_CHANNELS:
                 await leaderboards[guild.id].get_leaderboard_updates(leaderboard, channel)
-                await leaderboards[guild.id].get_pumbility_updates(leaderboard, channel)
                 break
 
     logger.info('Leaderboard updates sent')
+
+@tasks.loop(minutes=60)
+async def update_pumbility():
+    logger.info('Updating Pumbility leaderboard')
+    await leaderboard.update_pumbility()
+    logger.info('Pumbility leaderboard updated')
+
+    for guild in bot.guilds:
+        for channel in guild.text_channels:
+            if channel.name in UPDATE_CHANNELS:
+                await leaderboards[guild.id].get_pumbility_updates(leaderboard, channel)
+                break
 
 bot.help_command = LeaderboardHelpCommand()
 bot.run(TOKEN)
