@@ -48,7 +48,7 @@ async def on_ready():
         leaderboards[guild.id] = GuildLeaderboard(guild.id)
         logger.info(f'{guild.name}(id: {guild.id})')
 
-    #update_leaderboard.start()
+    update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
