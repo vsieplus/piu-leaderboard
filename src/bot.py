@@ -48,7 +48,7 @@ async def on_ready():
         leaderboards[guild.id] = GuildLeaderboard(guild.id)
         logger.info(f'{guild.name}(id: {guild.id})')
 
-    #update_leaderboard.start()
+    update_leaderboard.start()
 
 @bot.event
 async def on_command_error(ctx: commands.Context, error: commands.errors.CommandError):
@@ -205,6 +205,7 @@ async def update_leaderboard():
         for channel in guild.text_channels:
             if channel.name in UPDATE_CHANNELS:
                 await leaderboards[guild.id].get_leaderboard_updates(leaderboard, channel)
+                await leaderboards[guild.id].get_pumbility_updates(leaderboard, channel)
                 break
 
     logger.info('Leaderboard updates sent')
