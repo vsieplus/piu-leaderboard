@@ -22,6 +22,9 @@ Once the bot is in your server, you should create a new text channel titled `piu
 
 # Query a specific rank or range of ranks on a chart
 !queryr <rank> <chart_id>
+
+# Query a specific player's pumbility rank
+!querypu <player_id>
 ```
 
 ### Player tracking
@@ -58,13 +61,17 @@ The following parameters are used in some of the commands above. All parameters 
 
 ![example2](assets/ex_queryr.png)
 
+### Query a player's pumbility ranking
+
+![example3](assets/ex_querypu.png)
+
 ### Player tracking
 
 #### Start tracking a player...
 
 ![example3a](assets/ex_tracking.png)
 
-#### Later on, the bot will automatically send leaderboard updates for the tracked player(s)...
+#### Later on, the bot will automatically send leaderboard/pumbility rank updates for the tracked player(s)...
 
 ![example3b](assets/ex_track.png)
 
