@@ -14,9 +14,10 @@ from scrapy.crawler import CrawlerRunner
 from scrapy.utils.project import get_project_settings
 
 from chart import Chart
-from pumbility import Pumbility
 from score import Score
 from leaderboard_crawler import LeaderboardCrawler
+from pumbility import Pumbility
+from pumbility_crawler import PumbilityCrawler
 
 setup()
 
@@ -59,7 +60,7 @@ class Leaderboard:
         else :
             self.scores = dict()
 
-        self.pumbilities = dict()
+        self.pumbility_ranking = dict()
         self.score_updates = []
 
     async def update_chart(self, chart_id: str) -> bool:
@@ -120,7 +121,7 @@ class Leaderboard:
             if await self.update_chart(chart_id):
                 return chart_id
         else:
-            best_matches = await self.get_best_matches(chart_id)
+            best_matches = await self.get_best_chart_matches(chart_id)
             if len(best_matches) > 0:
                 best_matches_str = "\n".join([f"{i + 1}. {match[0].title()}" for i, match in enumerate(best_matches)])
                 await ctx.send(f'Chart `{chart_id}` not found. Did you mean one of the following?\n'
@@ -138,24 +139,37 @@ class Leaderboard:
 
         return None
 
-    async def get_best_matches(self, chart_id: str) -> List[tuple[str, int]]:
+    async def get_best_chart_matches(self, chart_id: str) -> List[tuple[str, int]]:
         """ Get the best matching chart ID for a given chart.
         @param chart_id: the chart's ID
         @return: the best matching chart IDs
         """
         return process.extractBests(chart_id, self.charts.keys(), score_cutoff=60, limit=10)
 
+    @wait_for(timeout=600.0)
+    def run_crawl_pumbility_ranking(self):
+        """ Update the Pumbility ranking.
+        @return: None
+        """
+        runner = CrawlerRunner(get_project_settings())
+        runner.crawl(PumbilityCrawler, pumbility_ranking=self.pumbility_ranking)
+        runner.join()
+
     async def query_pumbility(self, player_ids: List[str]) -> List[Pumbility]:
         """ Query a player's Pumbility ranking.
         @param player_ids: the player IDs, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
         @return: list(Pumbility) of all matching players' Pumbility rankings
         """
+        self.run_crawl_pumbility_ranking()
+
         pumbilities = []
 
         for player_id in player_ids:
-            for player_id in player_ids:
-                pumbilities.extend([value for key, value in self.pumbilities.items() if
-                                    player_id.upper() == (key if '#' in player_id else key.split('#')[0])])
+            pumbilities.extend([value for key, value in self.pumbility_ranking.items() if
+                                player_id.upper() == (key if '#' in player_id else key.split('#')[0])])
+
+        # sort pumbilities by rank
+        pumbilities.sort(key=lambda pumbility: pumbility.rank)
 
         return pumbilities
 
