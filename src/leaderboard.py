@@ -165,20 +165,20 @@ class Leaderboard:
 
         runner = CrawlerRunner(get_project_settings())
         runner.crawl(PumbilityCrawler, pumbility_ranking=self.pumbility_ranking, pumbility_updates=self.pumbility_updates)
-        runner.join()
+        _ = runner.join()
 
     async def update_pumbility(self):
         """ Update the Pumbility ranking.
         @return: None
         """
         self.run_crawl_pumbility_ranking()
-        await self.save_pumbility_leaderboard()
 
     async def query_pumbility(self, player_ids: List[str]) -> List[Pumbility]:
         """ Query a player's Pumbility ranking.
         @param player_ids: the player IDs, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
         @return: list(Pumbility) of all matching players' Pumbility rankings
         """
+        await self.save_pumbility_leaderboard()
         pumbilities = []
 
         for player_id in player_ids:
