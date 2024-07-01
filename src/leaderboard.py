@@ -31,7 +31,7 @@ MODES = [
 
 class Leaderboard:
     LEADERBOARD_SAVE_FILE = os.path.join(SAVE_DIR, 'leaderboard.json')
-    PUMBILITY_SAVE_FILE = os.path.json(SAVE_DIR, 'pumbility.json')
+    PUMBILITY_SAVE_FILE = os.path.join(SAVE_DIR, 'pumbility.json')
     SONGLIST_SAVE_FILE = os.path.join(SAVE_DIR, 'songlist.csv')
 
     def __init__(self):
