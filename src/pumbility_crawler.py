@@ -42,7 +42,7 @@ class PumbilityCrawler(scrapy.Spider):
 
             tie_count = update_curr_tie_count(tie_count, rank, previous_rank, player_id, previous_player_id, curr_tied_players)
             pumbility_ranking[player_id] = Pumbility(player_id=player_id, pumbility=pumbility, rank=rank, tie_count=tie_count, title=title, avatar_id=avatar_id, date=date)
-            tie_count = update_next_tie_count(tie_count, rank, previous_rank, i, player_id, self.pumbility_ranking, ranking_list, curr_tied_players)
+            tie_count = update_next_tie_count(tie_count, rank, previous_rank, i, player_id, pumbility_ranking, ranking_list, curr_tied_players)
 
         # check for + store pumbility updates if we have previous scores to compare to
         for player_id, pumbility in pumbility_ranking.items():
@@ -53,4 +53,7 @@ class PumbilityCrawler(scrapy.Spider):
             else:
                 self.pumbility_updates.append((pumbility, None))
 
-        self.pumbility_ranking = pumbility_ranking
+        self.pumbility_ranking.clear()
+
+        for player_id, pumbility in pumbility_ranking.items():
+            self.pumbility_ranking[player_id] = pumbility
