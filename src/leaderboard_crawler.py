@@ -47,7 +47,7 @@ class LeaderboardCrawler(scrapy.Spider):
             rank = PIUGAME_CRAWLER.parse_rank(ranking_info)
             player_id = PIUGAME_CRAWLER.parse_player_id(ranking_info, pumbility=False)
             score = PIUGAME_CRAWLER.parse_score(ranking_info)
-            avatar_id = PIUGAME_CRAWLER.parse_avatar_id(ranking_info)
+            avatar_id = PIUGAME_CRAWLER.parse_avatar_id(ranking_info, pumbility=False)
             date = PIUGAME_CRAWLER.parse_date(ranking)
 
             tie_count = update_curr_tie_count(tie_count, rank, previous_rank, player_id, previous_player_id, curr_tied_players)

@@ -71,13 +71,17 @@ class PIUGAME_CRAWLER:
             return int(score.replace(',', ''))
 
     @staticmethod
-    def parse_avatar_id(ranking) -> str:
+    def parse_avatar_id(ranking, pumbility: bool) -> str:
         """ Parse the player's avatar ID.
         @param ranking: the ranking div
+        @param pumbility: whether the ranking is for pumbility
         @return: the player's avatar ID
         """
         profile_img = ranking.xpath('.//div[@class="profile_img"]//div[@class="resize"]//div[@class="re bgfix"]/@style').get()
-        result =  re.search(r'(?<=background-image:url\(\'https://piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)', profile_img)
+
+        avatar_regex = ( r'(?<=background-image:url\(\'https://piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)' if pumbility else
+                         r'(?<=background-image:url\(\'https://phoenix\.piugame\.com/data/avatar_img/)[0-9a-z]+(?=\.png)' )
+        result =  re.search(avatar_regex, profile_img)
 
         avatar_id = result.group() if result is not None else ''
         return avatar_id

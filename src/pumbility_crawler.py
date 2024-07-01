@@ -37,7 +37,7 @@ class PumbilityCrawler(scrapy.Spider):
             pumbility = PIUGAME_CRAWLER.parse_score(ranking)
             rank = PIUGAME_CRAWLER.parse_rank(ranking)
             title = PIUGAME_CRAWLER.parse_title(ranking)
-            avatar_id = PIUGAME_CRAWLER.parse_avatar_id(ranking)
+            avatar_id = PIUGAME_CRAWLER.parse_avatar_id(ranking, pumbility=True)
             date = PIUGAME_CRAWLER.parse_date(ranking)
 
             tie_count = update_curr_tie_count(tie_count, rank, previous_rank, player_id, previous_player_id, curr_tied_players)
