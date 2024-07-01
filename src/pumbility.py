@@ -49,3 +49,26 @@ class Pumbility():
 
             return f'Rank: {rank_emoji}*{prev_pumbility.rank}{prev_rank_suffix}* -> *{self.rank}{rank_suffix}*{tied_text}\n' \
                    f'Pumbility: *{prev_formatted_pumbility}* -> *{formatted_pumbility}*'
+
+    def to_dict(self) -> dict:
+        return {
+            'player_id': self.player_id,
+            'pumbility': self.pumbility,
+            'rank': self.rank,
+            'tie_count': self.tie_count,
+            'title': self.title,
+            'avatar_id': self.avatar_id,
+            'date': self.date
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Pumbility':
+        return cls(
+            player_id=data['player_id'],
+            pumbility=data['pumbility'],
+            rank=data['rank'],
+            tie_count=data['tie_count'],
+            title=data['title'],
+            avatar_id=data['avatar_id'],
+            date=data['date']
+        )
