@@ -165,13 +165,17 @@ class Leaderboard:
 
         runner = CrawlerRunner(get_project_settings())
         runner.crawl(PumbilityCrawler, pumbility_ranking=self.pumbility_ranking, pumbility_updates=self.pumbility_updates)
-        _ = runner.join()
+        d = runner.join()
+        return d
 
     async def update_pumbility(self):
         """ Update the Pumbility ranking.
         @return: None
         """
-        self.run_crawl_pumbility_ranking()
+        loop = asyncio.get_event_loop()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = loop.run_in_executor(executor, self.run_crawl_pumbility_ranking)
+            await future
 
     async def query_pumbility(self, player_ids: List[str]) -> List[Pumbility]:
         """ Query a player's Pumbility ranking.
