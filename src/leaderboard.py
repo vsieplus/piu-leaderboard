@@ -159,7 +159,6 @@ class Leaderboard:
     @wait_for(timeout=600.0)
     def run_crawl_pumbility_ranking(self):
         """ Update the Pumbility ranking.
-        @return: None
         """
         self.pumbility_updates.clear()
 
