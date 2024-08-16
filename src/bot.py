@@ -212,7 +212,7 @@ async def update_leaderboard():
 
     logger.info('Leaderboard updates sent')
 
-@tasks.loop(minutes=60)
+@tasks.loop(minutes=180)
 async def update_pumbility():
     logger.info('Updating Pumbility leaderboard')
     await leaderboard.update_pumbility()
