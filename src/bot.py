@@ -216,6 +216,7 @@ async def update_leaderboard():
 async def update_pumbility():
     logger.info('Updating Pumbility leaderboard')
     await leaderboard.update_pumbility()
+    await leaderboard.save_pumbility_leaderboard()
     logger.info('Pumbility leaderboard updated')
 
     for guild in bot.guilds:

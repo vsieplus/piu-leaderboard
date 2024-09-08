@@ -181,7 +181,6 @@ class Leaderboard:
         @param player_ids: the player IDs, in the format of name[#tag]; If [#tag] is not specified, all players with the same name will be queried
         @return: list(Pumbility) of all matching players' Pumbility rankings
         """
-        await self.save_pumbility_leaderboard()
         pumbilities = []
 
         for player_id in player_ids:
