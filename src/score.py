@@ -13,9 +13,9 @@ MODE_COLORS = {
 }
 
 MODE_ICON_URLS = {
-    'Single': 'https://phoenix.piugame.com/l_img/stepball/full/s_bg.png',
-    'Double': 'https://phoenix.piugame.com/l_img/stepball/full/d_bg.png',
-    'Co-op' : 'https://phoenix.piugame.com/l_img/stepball/full/c_bg.png'
+    'Single': 'https://piugame.com/l_img/stepball/full/s_bg.png',
+    'Double': 'https://piugame.com/l_img/stepball/full/d_bg.png',
+    'Co-op' : 'https://piugame.com/l_img/stepball/full/c_bg.png'
 }
 
 class Score():
