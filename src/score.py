@@ -1,6 +1,7 @@
 # score.py
 
 import discord
+import os
 
 from chart import Chart
 from emojis import AVATAR_EMOJIS, GRADE_EMOJIS, RANKING_EMOJIS
@@ -13,9 +14,9 @@ MODE_COLORS = {
 }
 
 MODE_ICON_URLS = {
-    'Single': 'https://piugame.com/l_img/stepball/full/s_bg.png',
-    'Double': 'https://piugame.com/l_img/stepball/full/d_bg.png',
-    'Co-op' : 'https://piugame.com/l_img/stepball/full/c_bg.png'
+    'Single': os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 's_bg.png'),
+    'Double': os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'd_bg.png'),
+    'Co-op' : os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'c_bg.png'),
 }
 
 class Score():
@@ -39,7 +40,11 @@ class Score():
             color=embed_color,
         )
 
-        icon_url = MODE_ICON_URLS[self.chart.mode] if self.chart.mode in MODE_ICON_URLS else None
+        icon_url = None
+        if self.chart.mode in MODE_ICON_URLS:
+            _ = discord.File(MODE_ICON_URLS[self.chart.mode], filename='mode_icon.png')
+            icon_url = 'attachment://mode_icon.png'
+
         embed.set_author(name=self.chart.chart_id, url=self.chart.get_leaderboard_url(), icon_url=icon_url)
         embed.set_thumbnail(url=self.chart.thumbnail_url)
         embed.set_footer(text=f'Date • {self.date}')
