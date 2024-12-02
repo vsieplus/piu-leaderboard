@@ -14,9 +14,6 @@ MODE_COLORS = {
 }
 
 MODE_ICON_URLS = {
-    # 'Single': 'https://piugame.com/l_img/stepball/full/s_bg.png',
-    # 'Double': 'https://piugame.com/l_img/stepball/full/d_bg.png',
-    # 'Co-op' : 'https://piugame.com/l_img/stepball/full/c_bg.png'
     'Single': os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 's_bg.png'),
     'Double': os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'd_bg.png'),
     'Co-op' : os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'c_bg.png'),
