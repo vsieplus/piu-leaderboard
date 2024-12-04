@@ -56,7 +56,8 @@ class GuildLeaderboard:
         @return: None
         """
         for (new_score, prev_score) in await leaderboard.get_score_updates(self.players):
-            await channel.send(embed=await new_score.embed(prev_score=prev_score, compare=True))
+            embed, f = await new_score.embed(prev_score=prev_score, compare=True)
+            await channel.send(embed=embed, file=f)
 
     async def get_pumbility_updates(self, leaderboard: Leaderboard, channel: discord.TextChannel):
         """ Get the pumbility updates for all the players being tracked in the guild.

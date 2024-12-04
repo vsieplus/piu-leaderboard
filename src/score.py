@@ -41,15 +41,16 @@ class Score():
         )
 
         icon_url = None
+        f = None
         if self.chart.mode in MODE_ICON_URLS:
-            _ = discord.File(MODE_ICON_URLS[self.chart.mode], filename='mode_icon.png')
-            icon_url = 'attachment://mode_icon.png'
+            f = discord.File(MODE_ICON_URLS[self.chart.mode], filename='image.png')
+            icon_url = 'attachment://image.png'
 
         embed.set_author(name=self.chart.chart_id, url=self.chart.get_leaderboard_url(), icon_url=icon_url)
         embed.set_thumbnail(url=self.chart.thumbnail_url)
         embed.set_footer(text=f'Date • {self.date}')
 
-        return embed
+        return embed, f
 
     async def embed_description(self, prev_score: 'Score', compare: bool) -> str:
         rank_emoji = f'{RANKING_EMOJIS[self.rank]} ' if self.rank in RANKING_EMOJIS else '<:graymedal:1196960956517982359> '
