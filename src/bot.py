@@ -133,7 +133,8 @@ async def queryp(ctx: commands.Context, player_ids: str, chart_id: str):
                     await ctx.send(f'`{player_ids[0]}` is not on the leaderboard for {chart_id}')
             else:
                 for score in scores:
-                    await ctx.send(embed=await score.embed(prev_score=None, compare=False))
+                    embed, f = await score.embed(prev_score=None, compare=False)
+                    await ctx.send(embed=embed, file=f)
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
@@ -168,7 +169,8 @@ async def queryr(ctx: commands.Context, rank: str, chart_id: str):
                     await ctx.send(f'No scores with rank(s) {rank} on {chart_id}.')
                 else:
                     for score in scores:
-                        await ctx.send(embed=await score.embed(prev_score=None, compare=False))
+                        embed, f = await score.embed(prev_score=None, compare=False)
+                        await ctx.send(embed=embed, file=f)
         else:
             await ctx.send(LVL_NOT_FOUND_MSG.format(chart_id))
 
