@@ -40,6 +40,9 @@ class SonglistCrawler(scrapy.Spider):
             else:
                 follow_next = button.xpath('./@class').get() == 'on'
 
+        # sort songlist by title
+        self.songlist = sorted(self.songlist, key=lambda x: x['title'])
+
         self.save()
 
     def parse_ranking(self, ranking):
